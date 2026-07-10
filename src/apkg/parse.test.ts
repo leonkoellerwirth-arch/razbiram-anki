@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import initSqlJs, { type SqlJsStatic } from "sql.js";
 import { beforeAll, describe, expect, it } from "vitest";
-import { parseApkg } from "./parse";
+import { parseApkg, normalizeDeckName } from "./parse";
 
 // The round-trip golden-set (BIBLE §4): a real .apkg built by the legacy genanki
 // CLI is parsed back, and we assert the content survives the trip field-for-field.
@@ -52,6 +52,16 @@ describe("parseApkg — legacy genanki .apkg", () => {
       expect(parsed.models.has(note.modelId)).toBe(true);
       expect(Array.isArray(note.tags)).toBe(true);
     }
+  });
+
+  it("normalizes the modern 0x1F deck separator back to `::`", () => {
+    const sep = String.fromCharCode(0x1f);
+    // schema-18 `decks` table stores tree depth with 0x1F, not "::"
+    expect(normalizeDeckName(`1st year${sep}Latein${sep}MCQs`)).toBe("1st year::Latein::MCQs");
+    // already-"::" names (legacy JSON path) pass through unchanged
+    expect(normalizeDeckName("razbiram::Texte::Meine Familie")).toBe("razbiram::Texte::Meine Familie");
+    // a flat name stays flat
+    expect(normalizeDeckName("Default")).toBe("Default");
   });
 
   it("rejects a non-Anki archive with a clear message", async () => {

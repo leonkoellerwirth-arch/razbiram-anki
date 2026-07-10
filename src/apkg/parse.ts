@@ -5,7 +5,15 @@ import type { ApkgField, ApkgModel, ApkgNote, ApkgMedia, ParsedApkg } from "./ty
 import { decodeMediaManifest } from "./mediaManifest";
 
 const FIELD_SEP = String.fromCharCode(0x1f); // Anki joins fields with the 0x1F unit separator
+const DECK_SEP = String.fromCharCode(0x1f); // schema-18 `decks` table stores the tree depth with 0x1F, not "::"
 const DEFAULT_DECK = "Default";
+
+/** Modern (schema-18) collections store deck-tree depth with the 0x1F unit
+ *  separator in the `decks` table; the legacy JSON blob uses "::". Normalise both
+ *  to "::" so the whole app has a single hierarchy convention. */
+export function normalizeDeckName(raw: string): string {
+  return raw.split(DECK_SEP).join("::");
+}
 
 /** Parse a `.apkg` archive into the intermediate model. `SQL` is an initialised
  *  sql.js module — the caller supplies it (browser fetches the wasm; tests read
@@ -126,14 +134,14 @@ function modelsFromTables(db: Database): Map<string, ApkgModel> {
 function decksFromColJson(json: string): Map<string, string> {
   const parsed = JSON.parse(json) as Record<string, { name?: string }>;
   const map = new Map<string, string>();
-  for (const [id, d] of Object.entries(parsed)) map.set(id, d.name ?? DEFAULT_DECK);
+  for (const [id, d] of Object.entries(parsed)) map.set(id, normalizeDeckName(d.name ?? DEFAULT_DECK));
   return map;
 }
 
 function decksFromTable(db: Database): Map<string, string> {
   const map = new Map<string, string>();
   for (const [id, name] of queryRows(db, "SELECT id, name FROM decks")) {
-    map.set(String(id), String(name) || DEFAULT_DECK);
+    map.set(String(id), normalizeDeckName(String(name)) || DEFAULT_DECK);
   }
   return map;
 }
