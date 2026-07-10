@@ -41,7 +41,10 @@ export async function parseApkg(
     const media = await readMedia(zip);
 
     const deckNames = [...new Set(notes.map((n) => n.deckName))].sort();
-    return { deckNames, models, notes, media, schemaVersion: ver, collectionEntry: entry };
+    const allDeckNames = [...new Set(deckNamesById.values())]
+      .filter((name) => name && name !== DEFAULT_DECK)
+      .sort();
+    return { deckNames, allDeckNames, models, notes, media, schemaVersion: ver, collectionEntry: entry };
   } finally {
     db.close();
   }

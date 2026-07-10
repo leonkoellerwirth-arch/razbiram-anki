@@ -41,6 +41,9 @@ export interface ApkgMedia {
 export interface ParsedApkg {
   /** Distinct deck names that actually carry notes, "hardest" order not implied. */
   deckNames: string[];
+  /** Every deck named in the collection (except "Default"), even ones with no
+   *  notes — lets the UI explain an empty export ("this deck exists but is empty"). */
+  allDeckNames: string[];
   models: Map<string, ApkgModel>;
   notes: ApkgNote[];
   media: ApkgMedia[];

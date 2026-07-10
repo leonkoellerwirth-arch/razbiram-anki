@@ -28,11 +28,7 @@ export async function convertFile(file: File): Promise<ConvertResult> {
     const SQL = await loadSqlJs();
     const parsed = await parseApkg(await file.arrayBuffer(), SQL);
     if (parsed.notes.length === 0) {
-      throw new Error(
-        "Dieser Anki-Export enthält keine Karten. Prüfe in Anki, ob das gewählte Deck wirklich Karten " +
-          "zeigt (die Zahl neben dem Deck), und aktiviere beim Export „Include subdecks“, falls deine " +
-          "Karten in Unterdecks liegen. Exportiere dann erneut.",
-      );
+      throw new Error(emptyExportMessage(parsed.allDeckNames));
     }
     const deck = buildDeckJson(parsed, baseName);
     return { deck, media: parsed.media, summary: summarize(deck), sourceKind: "apkg", baseName };
@@ -48,4 +44,21 @@ export async function convertFile(file: File): Promise<ConvertResult> {
 
 function stripExtension(name: string): string {
   return name.replace(/\.(apkg|json)$/i, "");
+}
+
+/** Message for an .apkg that parsed cleanly but holds zero cards — the single
+ *  most common support case (a deck exported without its cards or without its
+ *  subdecks). When the empty file still *names* decks, we say so, so the student
+ *  sees "the deck is there, it's just empty" rather than "the tool is broken". */
+export function emptyExportMessage(deckNames: string[]): string {
+  const found =
+    deckNames.length > 0
+      ? `Gefundene Decks in dieser Datei: ${deckNames.map((n) => `„${n}“`).join(", ")} — aber 0 Karten darin. `
+      : "";
+  return (
+    `In dieser Datei wurden 0 Karten gefunden. ${found}` +
+    "Das ist fast immer ein leerer Export: Exportiere in Anki das Deck, das die Karten " +
+    "wirklich zeigt (die Zahl neben dem Deck-Namen > 0), und aktiviere „Include subdecks“, " +
+    "falls die Karten in Unterdecks liegen. Exportiere dann erneut."
+  );
 }
