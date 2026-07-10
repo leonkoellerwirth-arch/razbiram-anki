@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import { decompress } from "fzstd";
 import type { Database, SqlJsStatic } from "sql.js";
 import type { ApkgField, ApkgModel, ApkgNote, ApkgMedia, ParsedApkg } from "./types";
+import { decodeMediaManifest } from "./mediaManifest";
 
 const FIELD_SEP = String.fromCharCode(0x1f); // Anki joins fields with the 0x1F unit separator
 const DEFAULT_DECK = "Default";
@@ -15,7 +16,7 @@ export async function parseApkg(
 ): Promise<ParsedApkg> {
   const zip = await JSZip.loadAsync(archive);
 
-  const { entry, bytes } = await readCollectionBytes(zip);
+  const { entry, bytes } = await pickCollection(zip);
   const db = new SQL.Database(bytes);
   try {
     const [ver, modelsJson, decksJson] = readColRow(db);
@@ -40,19 +41,37 @@ export async function parseApkg(
 
 // --- collection location ------------------------------------------------------
 
-/** Pick the collection member (newest format first) and decompress if needed. */
-async function readCollectionBytes(zip: JSZip): Promise<{ entry: string; bytes: Uint8Array }> {
-  // Order matters: a modern export can carry several; the newest is authoritative.
-  for (const entry of ["collection.anki21b", "collection.anki21", "collection.anki2"]) {
-    const file = zip.file(entry);
-    if (!file) continue;
-    const raw = await file.async("uint8array");
-    const bytes = entry.endsWith("b") ? decompress(raw) : raw;
-    return { entry, bytes };
+const COLLECTION_ORDER = ["collection.anki21b", "collection.anki21", "collection.anki2"] as const;
+
+/** Pick which collection member to read — exactly as Anki does: the `meta` file
+ *  declares the package version, and that decides which collection is authoritative
+ *  (v3 → `.anki21b`, v2 → `.anki21`, else `.anki2`). The other members are
+ *  backwards-compat stubs (e.g. a lone "Please update Anki" placeholder note) and
+ *  must be ignored, or we'd surface bogus cards. Falls back to the newest present
+ *  member when there's no `meta`. */
+async function pickCollection(zip: JSZip): Promise<{ entry: string; bytes: Uint8Array }> {
+  const present = COLLECTION_ORDER.filter((entry) => zip.file(entry) !== null);
+  if (present.length === 0) {
+    throw new ApkgParseError(
+      "Das sieht nicht wie ein Anki-Deck aus — keine collection-Datei in der .apkg gefunden.",
+    );
   }
-  throw new ApkgParseError(
-    "Das sieht nicht wie ein Anki-Deck aus — keine collection-Datei in der .apkg gefunden.",
-  );
+  const preferred = await preferredEntry(zip);
+  const entry = preferred && present.includes(preferred) ? preferred : present[0];
+  const raw = await zip.file(entry)!.async("uint8array");
+  return { entry, bytes: entry.endsWith("b") ? decompress(raw) : raw };
+}
+
+/** The collection named by the `meta` protobuf (`version` = field 1), or null. */
+async function preferredEntry(zip: JSZip): Promise<(typeof COLLECTION_ORDER)[number] | null> {
+  const metaFile = zip.file("meta");
+  if (!metaFile) return null;
+  const bytes = await metaFile.async("uint8array");
+  if (bytes.length < 2 || bytes[0] !== 0x08) return null; // field 1, varint
+  const version = bytes[1];
+  if (version >= 3) return "collection.anki21b";
+  if (version === 2) return "collection.anki21";
+  return "collection.anki2";
 }
 
 // --- col row (schema version + legacy JSON blobs) -----------------------------
@@ -144,9 +163,9 @@ function readNotes(db: Database, deckNamesById: Map<string, string>): ApkgNote[]
 async function readMedia(zip: JSZip): Promise<ApkgMedia[]> {
   const mediaFile = zip.file("media");
   if (!mediaFile) return [];
-  const map = JSON.parse(await mediaFile.async("string")) as Record<string, string>;
+  const map = decodeMediaManifest(await mediaFile.async("uint8array"));
   const out: ApkgMedia[] = [];
-  for (const [index, name] of Object.entries(map)) {
+  for (const [index, name] of map) {
     const entry = zip.file(index);
     if (!entry) continue;
     out.push({ name, bytes: await entry.async("uint8array") });
