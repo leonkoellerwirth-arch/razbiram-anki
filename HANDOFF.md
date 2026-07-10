@@ -48,10 +48,8 @@ Concrete and honest.
 **Open / blocked:**
 - Hub Mini-ADR still to write (reverse role + CEFR table correction).
 - razbiram.com's real ingest route (repo layout, token scopes) unconfirmed.
-- Web app phases 2–6 not built yet (governance + Phase-1 scaffold done this session).
-- `collection.anki21b` (zstd) parsing not yet handled.
-- Reorg + governance + scaffold are **uncommitted** — public repo still shows the
-  old Python-only layout until the next commit/push.
+- Web app phases 3–6 not built yet (governance + scaffold + `.apkg` parser done).
+- `collection.anki21b` (zstd) parsing coded but not fixture-tested (need a modern export).
 
 **Next (Phase 3 — the one remaining core piece):** `src/crowdanki/deckJson.ts` —
 turn `ParsedApkg` into a CrowdAnki `deck.json`: a `Deck` (`__type__`, `name`,
@@ -71,6 +69,14 @@ media) + student-facing README.
 NoteModel needs `__type__`, `crowdanki_uuid`, `name`, `flds:[{name,ord}]` (+ `tmpls`,
 `css` for fidelity). Note needs `__type__`, `fields:[]`, `guid`, `note_model_uuid`, `tags:[]`.
 
-**Continuity warnings:** the `web/` theme is razbiram product IP — attribute, don't
-relicense. The student's GitHub token is browser-only. Import razbiram-nlp from the
-hub; don't copy it. Bulgarian examples must stay correct.
+**Session tooling (family standard, added 2026-07-10):** `start.sh` (Vite launcher,
+live-verified HTTP 200); deterministic `scripts/{state,gate,secure,session-snapshot}.sh`;
+and `.claude/skills/{session-start,session-end}`. Open a session with **session-start**,
+close with **session-end**. The repo memory is `BIBLE.md` (invariants + decisions) +
+`HANDOFF.md` (this log) + `CLAUDE.md` (rules); the skills read/write them.
+
+**Continuity warnings:** the theme is razbiram product IP (© razbiram.com) — attribute,
+don't relicense. Output is **CrowdAnki `deck.json` only** — the app owns everything
+downstream; don't rebuild adapters. Import razbiram-nlp from the hub; don't copy it.
+Bulgarian examples must stay correct. The owner decides scope — execute decisively,
+don't over-ask.

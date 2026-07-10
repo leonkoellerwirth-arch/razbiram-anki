@@ -1,3 +1,6 @@
+# Claude Code local settings (permissions) — keep skills/ tracked, not local prefs
+.claude/settings.local.json
+
 # Node / web app
 node_modules/
 dist/
