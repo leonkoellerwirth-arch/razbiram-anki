@@ -1,4 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { convertFile, type ConvertResult } from "./crowdanki/convert";
+import { downloadDeck } from "./crowdanki/download";
+import { cardTypeLabel } from "./crowdanki/cardType";
+
+// CodeMirror is heavy and only needed once the student opens the preview — split it out.
+const DeckJsonViewer = lazy(() => import("./DeckJsonViewer"));
 
 /** The razbiram node-mark — © razbiram.com, drawn in code (no image asset). */
 function NodeMark({ size = 26 }: { size?: number }) {
@@ -49,19 +55,34 @@ function humanSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+type Status =
+  | { phase: "idle" }
+  | { phase: "converting" }
+  | { phase: "done"; result: ConvertResult }
+  | { phase: "error"; message: string };
+
 export default function App() {
   const [theme, toggleTheme] = useTheme();
   const [isOver, setIsOver] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<Status>({ phase: "idle" });
   const inputRef = useRef<HTMLInputElement>(null);
 
   const accept = useCallback((f: File | undefined) => {
     if (!f) return;
-    if (!f.name.toLowerCase().endsWith(".apkg")) {
-      window.alert("Bitte eine Anki-Datei (.apkg) auswählen.");
+    const name = f.name.toLowerCase();
+    if (!name.endsWith(".apkg") && !name.endsWith(".json")) {
+      setFile(f);
+      setStatus({ phase: "error", message: "Bitte eine Anki-Datei (.apkg) oder eine deck.json auswählen." });
       return;
     }
     setFile(f);
+    setStatus({ phase: "converting" });
+    convertFile(f)
+      .then((result) => setStatus({ phase: "done", result }))
+      .catch((err: unknown) =>
+        setStatus({ phase: "error", message: err instanceof Error ? err.message : "Konvertierung fehlgeschlagen." }),
+      );
   }, []);
 
   const onDrop = useCallback(
@@ -100,9 +121,9 @@ export default function App() {
           Dein Anki-Deck, bereit für razbiram.com
         </h1>
         <p className="rz-muted" style={{ fontSize: 18, margin: "0 0 24px", maxWidth: 560 }}>
-          Hast du ein Anki-Deck — eigenes oder von Freunden? Zieh es hier rein, sieh dir die
-          Karten an und übernimm es mit einem Klick in razbiram.com. Kein Terminal, keine
-          Installation.
+          Hast du ein Anki-Deck — eigenes oder von Freunden? Zieh es hier rein (<code>.apkg</code> oder eine
+          fertige <code>deck.json</code>), sieh dir die Karten an und lade es für razbiram.com herunter.
+          Kein Terminal, keine Installation.
         </p>
 
         <div
@@ -120,7 +141,7 @@ export default function App() {
           <input
             ref={inputRef}
             type="file"
-            accept=".apkg"
+            accept=".apkg,.json,application/json"
             hidden
             onChange={(e) => accept(e.target.files?.[0])}
           />
@@ -133,25 +154,27 @@ export default function App() {
           ) : (
             <>
               <div style={{ fontWeight: 700, fontSize: 18 }}>
-                Anki-Deck (.apkg) hierher ziehen
+                Anki-Deck (.apkg) oder deck.json hierher ziehen
               </div>
               <div className="rz-faint" style={{ marginTop: 4 }}>oder klicken zum Auswählen</div>
             </>
           )}
         </div>
 
-        {file && (
-          <div className="rz-card" style={{ marginTop: 20 }}>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <span className="rz-badge band-A2">A2</span>
-              <span className="rz-badge band-B1">B1</span>
-              <span className="rz-faint">Kartentyp-Erkennung & Vorschau folgen im nächsten Schritt.</span>
-            </div>
-            <button className="rz-btn rz-btn-primary" disabled style={{ marginTop: 16 }}>
-              In razbiram.com übernehmen
-            </button>
+        {status.phase === "converting" && (
+          <div className="rz-card rz-muted" style={{ marginTop: 20 }}>
+            Karten werden gelesen …
           </div>
         )}
+
+        {status.phase === "error" && (
+          <div className="rz-card" style={{ marginTop: 20, borderColor: "var(--primary)" }}>
+            <strong>Das hat nicht geklappt.</strong>
+            <div className="rz-muted" style={{ marginTop: 6 }}>{status.message}</div>
+          </div>
+        )}
+
+        {status.phase === "done" && <Result result={status.result} dark={theme === "dark"} />}
       </main>
 
       <footer
@@ -160,6 +183,87 @@ export default function App() {
       >
         Part of the razbiram ecosystem · razbiram-anki · visual identity © razbiram.com
       </footer>
+    </div>
+  );
+}
+
+function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
+  const [saving, setSaving] = useState(false);
+  const [showJson, setShowJson] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { summary } = result;
+  const json = useMemo(() => JSON.stringify(result.deck, null, 1), [result]);
+
+  const onDownload = useCallback(() => {
+    setSaving(true);
+    downloadDeck(result).finally(() => setSaving(false));
+  }, [result]);
+
+  const onCopy = useCallback(() => {
+    navigator.clipboard.writeText(json).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    });
+  }, [json]);
+
+  return (
+    <div className="rz-card" style={{ marginTop: 20 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+        {summary.cardTypes.map((t) => (
+          <span key={t} className="rz-chip">{cardTypeLabel(t)}</span>
+        ))}
+        {summary.hasMedia && <span className="rz-chip">mit Medien</span>}
+      </div>
+
+      <div style={{ margin: "14px 0 4px", fontWeight: 700, fontSize: 18 }}>{summary.rootName}</div>
+      <div className="rz-muted">
+        <span className="rz-numeral">{summary.totalNotes}</span> Karten
+        {summary.deckNames.length > 1 && <> · {summary.deckNames.length} Unterdecks</>}
+        {" · "}
+        {result.sourceKind === "apkg" ? "aus .apkg" : "aus deck.json"}
+      </div>
+
+      {summary.sampleCards.length > 0 && (
+        <ul style={{ listStyle: "none", padding: 0, margin: "16px 0 0", display: "grid", gap: 8 }}>
+          {summary.sampleCards.map((card, i) => (
+            <li
+              key={i}
+              style={{
+                border: "1px solid var(--hairline)",
+                borderRadius: "var(--r-md)",
+                padding: "10px 12px",
+                background: "var(--surface-2)",
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>{card.front || <span className="rz-faint">(leer)</span>}</div>
+              {card.back && <div className="rz-muted" style={{ marginTop: 2 }}>{card.back}</div>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, alignItems: "center" }}>
+        <button className="rz-btn rz-btn-primary" onClick={onDownload} disabled={saving}>
+          {saving ? "wird erstellt …" : result.media.length > 0 ? "deck.json + Medien herunterladen" : "deck.json herunterladen"}
+        </button>
+        <button className="rz-btn" onClick={() => setShowJson((v) => !v)} aria-expanded={showJson}>
+          {showJson ? "deck.json ausblenden" : "deck.json ansehen"}
+        </button>
+        {showJson && (
+          <button className="rz-btn" onClick={onCopy}>{copied ? "kopiert ✓" : "kopieren"}</button>
+        )}
+      </div>
+      <div className="rz-faint" style={{ marginTop: 8, fontSize: 13 }}>
+        Lade die Datei anschließend in razbiram.com hoch.
+      </div>
+
+      {showJson && (
+        <div style={{ marginTop: 14 }}>
+          <Suspense fallback={<div className="rz-faint">Editor wird geladen …</div>}>
+            <DeckJsonViewer value={json} dark={dark} />
+          </Suspense>
+        </div>
+      )}
     </div>
   );
 }

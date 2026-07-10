@@ -202,6 +202,19 @@ body {
 .band-C1 { background: var(--band-C1-bg); color: var(--band-C1-fg); }
 .band-C2 { background: var(--band-C2-bg); color: var(--band-C2-fg); }
 
+/* --- Type chips (real Anki card types, not language levels) ------------------ */
+.rz-chip {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  border-radius: 999px;
+  padding: 0.16rem 0.6rem;
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+}
+
 /* --- Dropzone --------------------------------------------------------------- */
 .rz-dropzone {
   border: 2px dashed var(--hairline);
@@ -222,4 +235,17 @@ body {
 .rz-numeral {
   font-family: var(--font-display);
   font-weight: 700;
+}
+
+/* --- deck.json viewer (CodeMirror) ------------------------------------------ */
+.rz-json-viewer {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.rz-json-viewer .cm-editor {
+  font-size: 12px;
+}
+.rz-json-viewer .cm-editor.cm-focused {
+  outline: none;
 }
