@@ -53,8 +53,7 @@ Operating guide for Claude Code sessions in this repo. **Read order (precedence,
 
 ```bash
 # Web app (reverse direction — current focus)
-npm install
-npm run dev            # Vite dev server
+./start.sh             # install deps if needed + Vite dev server (--no-open / --free-port / --help)
 npm run build          # tsc --noEmit && vite build
 npm test               # web unit tests (deck round-trip golden-set)
 
