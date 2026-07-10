@@ -8,14 +8,14 @@ constitution (`../razbiram-nlp/docs/razbiram-ECOSYSTEM.md`) still outranks it.
 
 **The public, MIT-licensed Anki bridge of the razbiram ecosystem.** Two directions:
 
-- **Reverse (current focus).** A student's existing Anki `.apkg` → razbiram.com's
-  **LearnDeck JSON**, which the student uploads through razbiram.com's *existing*
-  `/learn/decks` surface (`POST /me/decks`) — no GitHub, no platform change. A
-  **standalone web app** (Vite + React 19 + Tailwind v4 + TS, mirroring
-  `razbiram-nlp/web`) that runs fully client-side: parse → adapt → download the
-  LearnDeck JSON. (Ground truth: the app only ingests raw `.apkg` nowhere; this
-  is the whole gap. It reads GitHub `studywithme_db` read-only via a *server*
-  token — there is no per-student-repo mechanism, so we don't invent one.)
+- **Reverse (current focus).** A student's existing Anki `.apkg` → **CrowdAnki
+  `deck.json`** — exactly the format razbiram.com reads from
+  `studywithme_db/app/studywithme-bg/anki/<Deck>/deck.json`. That is the whole
+  job. A **standalone web app** (Vite + React 19 + Tailwind v4 + TS, mirroring
+  `razbiram-nlp/web`) that runs fully client-side: parse → build `deck.json`
+  (+ media) → download. (Ground truth: raw `.apkg` parsing exists nowhere in the
+  ecosystem — this is the whole gap. Everything downstream of `deck.json`
+  already exists in the app.)
 - **Forward (frozen in `legacy/`).** `EnrichedDocument` → styled Anki `.apkg`
   via genanki + an AnkiConnect live-sync. Kept as reference, not dual-maintained.
 
@@ -52,30 +52,28 @@ constitution (`../razbiram-nlp/docs/razbiram-ECOSYSTEM.md`) still outranks it.
 ## §3 — Architecture map
 
 Web app (client-only): **parse** (`.apkg` → JSZip unzip → sql.js reads
-`collection.anki2`/`.anki21`/`.anki21b`) → **adapt** (build CrowdAnki
-note/model shapes from the parse, then mirror the app's adapter chain —
-`ankiNoteParser` field/detect helpers + `ankiDeckAdapter` (mcq / flashcard /
-image-occlusion) + `ankiMixedBasicMcqAdapter`, ported since a public MIT tool
-can't import the private app) → **LearnDeck JSON** (`studywithme-bg.learncard.v1`,
-must pass the app's `isLearnCardShape`) → **preview** (razbiram theme) →
-**download** → student uploads at `/learn/decks`. `legacy/` holds the frozen
-Python forward bridge.
+`collection.anki2`/`.anki21`/`.anki21b` → notes, models, decks, media) →
+**build `deck.json`** (mechanical transform into the CrowdAnki shape: `Deck`
+with `__type__`, `children` (the `::` tree), `note_models`, `notes`,
+`media_files`; deterministic `crowdanki_uuid`s so re-exports update) → **preview**
+(razbiram theme) → **download** the `deck.json` (+ media). `legacy/` holds the
+frozen Python forward bridge.
 
 ## §4 — Decision register
 
 - [x] **Reverse direction is the current focus** — standalone web app; per-student
       private GitHub repo + token. (owner, 2026-07-10)
-- [x] **Output format** — the app's **LearnDeck JSON** (`studywithme-bg.learncard.v1`),
-      uploadable via the existing `/learn/decks`. (owner, 2026-07-10 — corrects the
-      earlier vocab.v1/CrowdAnki choice once the real app pipeline was mapped.)
+- [x] **Output format** — the parser produces **CrowdAnki `deck.json`**, exactly the
+      format razbiram.com reads from `studywithme_db/.../anki/<Deck>/deck.json`.
+      That is the whole job; nothing more. (owner, 2026-07-10)
 - [x] **GitHub reality** — the app reads `HamudiLeon/studywithme_db` **read-only via
       a server token**; no per-student repo, no in-app push. The primary path is
       local file → `/learn/decks` upload, not a GitHub push. (corrects the earlier
       per-student-repo+token choice.)
-- [x] **Reuse by mirroring** — port the app's `.apkg`-absent adapter chain
-      (`ankiNoteParser`/`ankiDeckAdapter`/`ankiMixedBasicMcqAdapter`/`sanitizeAnkiHtml`)
-      into razbiram-anki; the private app can't be imported by a public MIT tool.
-      When razbiram-anki is the 2nd/3rd consumer, extract to the hub (Rule of Three).
+- [x] **Reuse by format-compatibility** — produce the exact CrowdAnki `deck.json`
+      shape the app's `ankiNoteParser.prepareCrowdAnkiNotes` already reads (and that
+      `generate_manifests.py` classifies). No adapter port: the app owns everything
+      downstream of `deck.json`. razbiram-anki owns only `.apkg → deck.json`.
 - [x] **CEFR scale = Studio** emerald→amber (authoritative over the ECOSYSTEM
       table). (owner, 2026-07-10)
 - [x] **Forward Python CLI → `legacy/`**, frozen; not dual-maintained. (owner, 2026-07-10)

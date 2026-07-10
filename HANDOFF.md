@@ -34,13 +34,15 @@ Concrete and honest.
   It reads `studywithme_db` **read-only via a server token** (no per-student repo,
   no in-app push). A student **upload** surface already exists at `/learn/decks`
   (`POST /me/decks`) that accepts the app's **LearnDeck JSON**.
-- **Corrected two earlier decisions** from this ground truth (BIBLE §4): output =
-  **LearnDeck JSON** (uploadable today), not vocab.v1/CrowdAnki; and there is no
-  per-student GitHub repo — the primary path is local file → `/learn/decks`.
+- **Owner set the final output (definitive):** the parser produces **CrowdAnki
+  `deck.json`** — exactly the format razbiram.com reads from
+  `studywithme_db/app/studywithme-bg/anki/<Deck>/deck.json`. That is the whole job.
+  No LearnDeck adapter port (the app owns everything downstream of `deck.json`);
+  no per-student GitHub repo. Earlier vocab.v1 / LearnDeck framings are superseded.
 
 **Decided (see BIBLE §4):** reverse direction = focus; standalone web app; output =
-LearnDeck JSON via the existing `/learn/decks` upload; reuse by **mirroring** the
-app's adapter chain (public MIT can't import the private app); CEFR scale = Studio
+**CrowdAnki `deck.json`** (+ media); reuse by producing the exact shape the app's
+`ankiNoteParser`/`generate_manifests.py` already read (no port); CEFR scale = Studio
 (emerald→amber); forward CLI frozen in `legacy/`; theme © razbiram.com.
 
 **Open / blocked:**
@@ -51,11 +53,23 @@ app's adapter chain (public MIT can't import the private app); CEFR scale = Stud
 - Reorg + governance + scaffold are **uncommitted** — public repo still shows the
   old Python-only layout until the next commit/push.
 
-**Next:** Phase 3 — port the app's adapter chain into `src/adapt/` (from
-`~/dev/ai/studywithme-bg/app/src/lib/adapters/*` + `utils/sanitizeAnkiHtml`),
-feed it CrowdAnki shapes built from the parser, emit **LearnDeck JSON**. Golden-set:
-`.apkg` → LearnDeck passes the app's `isLearnCardShape` and matches `adaptCrowdAnkiDeck`
-card types/counts. Then Phase 4 UI (preview + download) + README.
+**Next (Phase 3 — the one remaining core piece):** `src/crowdanki/deckJson.ts` —
+turn `ParsedApkg` into a CrowdAnki `deck.json`: a `Deck` (`__type__`, `name`,
+`crowdanki_uuid`, `children` = the `::` tree, `note_models`, `notes`, `media_files`),
+deterministic `crowdanki_uuid`s (stable re-export = update), notes referencing their
+model's uuid. Match the real shape in
+`studywithme_db/app/studywithme-bg/anki/Varna__Biologie/deck.json`. Golden-set:
+`.apkg` → `deck.json` → feed a small `prepareCrowdAnkiNotes` mirror and assert the
+notes/models/fields survive; run the file through `generate_manifests.py` logic and
+check card-type detection. Then Phase 4 UI (drop → preview → download `deck.json` +
+media) + student-facing README.
+
+**Reference deck.json top-level keys** (verbatim from a real file): `__type__`,
+`children`, `crowdanki_uuid`, `deck_config_uuid`, `deck_configurations`, `desc`,
+`desiredRetention`, `dyn`, `extendNew`, `extendRev`, `media_files`, `name`,
+`newLimit`, `newLimitToday`, `note_models`, `notes`, `reviewLimit`, `reviewLimitToday`.
+NoteModel needs `__type__`, `crowdanki_uuid`, `name`, `flds:[{name,ord}]` (+ `tmpls`,
+`css` for fidelity). Note needs `__type__`, `fields:[]`, `guid`, `note_model_uuid`, `tags:[]`.
 
 **Continuity warnings:** the `web/` theme is razbiram product IP — attribute, don't
 relicense. The student's GitHub token is browser-only. Import razbiram-nlp from the
