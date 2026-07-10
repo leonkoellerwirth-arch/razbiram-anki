@@ -1,0 +1,412 @@
+{
+  "text": "Майка ми купува хляб и мляко. Ние сме голямо семейство. Днес пия кафе и ям една ябълка.",
+  "lang": "bg",
+  "sentences": [
+    {
+      "text": "Майка ми купува хляб и мляко.",
+      "start": 0,
+      "end": 29,
+      "tokens": [
+        {
+          "text": "Майка",
+          "kind": "word",
+          "start": 0,
+          "end": 5,
+          "lemma": "майка",
+          "upos": "NOUN",
+          "feats": {
+            "Gender": "Fem",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "ми",
+          "kind": "word",
+          "start": 6,
+          "end": 8,
+          "lemma": "аз",
+          "upos": "PRON",
+          "feats": {
+            "Person": "1",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "купува",
+          "kind": "word",
+          "start": 9,
+          "end": 15,
+          "lemma": "купувам",
+          "upos": "VERB",
+          "feats": {
+            "Aspect": "Imp",
+            "Tense": "Pres",
+            "Person": "3",
+            "Number": "Sing"
+          },
+          "band": "A2"
+        },
+        {
+          "text": "хляб",
+          "kind": "word",
+          "start": 16,
+          "end": 20,
+          "lemma": "хляб",
+          "upos": "NOUN",
+          "feats": {
+            "Gender": "Masc",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "и",
+          "kind": "word",
+          "start": 21,
+          "end": 22,
+          "lemma": "и",
+          "upos": "CCONJ",
+          "feats": {},
+          "band": "A1"
+        },
+        {
+          "text": "мляко",
+          "kind": "word",
+          "start": 23,
+          "end": 28,
+          "lemma": "мляко",
+          "upos": "NOUN",
+          "feats": {
+            "Gender": "Neut",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": ".",
+          "kind": "punct",
+          "start": 28,
+          "end": 29,
+          "lemma": ".",
+          "upos": null,
+          "feats": {},
+          "band": null
+        }
+      ],
+      "gloss": {
+        "lang": "de",
+        "text": "Meine Mutter kauft Brot und Milch."
+      }
+    },
+    {
+      "text": "Ние сме голямо семейство.",
+      "start": 30,
+      "end": 55,
+      "tokens": [
+        {
+          "text": "Ние",
+          "kind": "word",
+          "start": 30,
+          "end": 33,
+          "lemma": "аз",
+          "upos": "PRON",
+          "feats": {
+            "Person": "1",
+            "Number": "Plur"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "сме",
+          "kind": "word",
+          "start": 34,
+          "end": 37,
+          "lemma": "съм",
+          "upos": "AUX",
+          "feats": {
+            "Tense": "Pres",
+            "Person": "1",
+            "Number": "Plur"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "голямо",
+          "kind": "word",
+          "start": 38,
+          "end": 44,
+          "lemma": "голям",
+          "upos": "ADJ",
+          "feats": {
+            "Gender": "Neut",
+            "Number": "Sing",
+            "Degree": "Pos"
+          },
+          "band": "A2"
+        },
+        {
+          "text": "семейство",
+          "kind": "word",
+          "start": 45,
+          "end": 54,
+          "lemma": "семейство",
+          "upos": "NOUN",
+          "feats": {
+            "Gender": "Neut",
+            "Number": "Sing"
+          },
+          "band": "A2"
+        },
+        {
+          "text": ".",
+          "kind": "punct",
+          "start": 54,
+          "end": 55,
+          "lemma": ".",
+          "upos": null,
+          "feats": {},
+          "band": null
+        }
+      ],
+      "gloss": {
+        "lang": "de",
+        "text": "Wir sind eine große Familie."
+      }
+    },
+    {
+      "text": "Днес пия кафе и ям една ябълка.",
+      "start": 56,
+      "end": 87,
+      "tokens": [
+        {
+          "text": "Днес",
+          "kind": "word",
+          "start": 56,
+          "end": 60,
+          "lemma": "днес",
+          "upos": "ADV",
+          "feats": {},
+          "band": "A1"
+        },
+        {
+          "text": "пия",
+          "kind": "word",
+          "start": 61,
+          "end": 64,
+          "lemma": "пия",
+          "upos": "VERB",
+          "feats": {
+            "Aspect": "Imp",
+            "Tense": "Pres",
+            "Person": "1",
+            "Number": "Sing"
+          },
+          "band": "A2"
+        },
+        {
+          "text": "кафе",
+          "kind": "word",
+          "start": 65,
+          "end": 69,
+          "lemma": "кафе",
+          "upos": "NOUN",
+          "feats": {
+            "Gender": "Neut",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "и",
+          "kind": "word",
+          "start": 70,
+          "end": 71,
+          "lemma": "и",
+          "upos": "CCONJ",
+          "feats": {},
+          "band": "A1"
+        },
+        {
+          "text": "ям",
+          "kind": "word",
+          "start": 72,
+          "end": 74,
+          "lemma": "ям",
+          "upos": "VERB",
+          "feats": {
+            "Aspect": "Imp",
+            "Tense": "Pres",
+            "Person": "1",
+            "Number": "Sing"
+          },
+          "band": "A2"
+        },
+        {
+          "text": "една",
+          "kind": "word",
+          "start": 75,
+          "end": 79,
+          "lemma": "един",
+          "upos": "NUM",
+          "feats": {
+            "Gender": "Fem",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": "ябълка",
+          "kind": "word",
+          "start": 80,
+          "end": 86,
+          "lemma": "ябълка",
+          "upos": "NOUN",
+          "feats": {
+            "Gender": "Fem",
+            "Number": "Sing"
+          },
+          "band": "A1"
+        },
+        {
+          "text": ".",
+          "kind": "punct",
+          "start": 86,
+          "end": 87,
+          "lemma": ".",
+          "upos": null,
+          "feats": {},
+          "band": null
+        }
+      ],
+      "gloss": {
+        "lang": "de",
+        "text": "Heute trinke ich Kaffee und esse einen Apfel."
+      }
+    }
+  ],
+  "vocab": [
+    {
+      "lemma": "майка",
+      "upos": "NOUN",
+      "count": 1,
+      "freq_rank": 180,
+      "band": "A1",
+      "gloss": {
+        "lang": "de",
+        "text": "Mutter"
+      }
+    },
+    {
+      "lemma": "купувам",
+      "upos": "VERB",
+      "count": 1,
+      "freq_rank": 640,
+      "band": "A2",
+      "gloss": {
+        "lang": "de",
+        "text": "kaufen"
+      }
+    },
+    {
+      "lemma": "хляб",
+      "upos": "NOUN",
+      "count": 1,
+      "freq_rank": 720,
+      "band": "A1",
+      "gloss": {
+        "lang": "de",
+        "text": "Brot"
+      }
+    },
+    {
+      "lemma": "мляко",
+      "upos": "NOUN",
+      "count": 1,
+      "freq_rank": 910,
+      "band": "A1",
+      "gloss": {
+        "lang": "de",
+        "text": "Milch"
+      }
+    },
+    {
+      "lemma": "голям",
+      "upos": "ADJ",
+      "count": 1,
+      "freq_rank": 150,
+      "band": "A2",
+      "gloss": {
+        "lang": "de",
+        "text": "groß"
+      }
+    },
+    {
+      "lemma": "семейство",
+      "upos": "NOUN",
+      "count": 1,
+      "freq_rank": 260,
+      "band": "A2",
+      "gloss": {
+        "lang": "de",
+        "text": "Familie"
+      }
+    },
+    {
+      "lemma": "днес",
+      "upos": "ADV",
+      "count": 1,
+      "freq_rank": 210,
+      "band": "A1",
+      "gloss": {
+        "lang": "de",
+        "text": "heute"
+      }
+    },
+    {
+      "lemma": "пия",
+      "upos": "VERB",
+      "count": 1,
+      "freq_rank": 830,
+      "band": "A2",
+      "gloss": {
+        "lang": "de",
+        "text": "trinken"
+      }
+    },
+    {
+      "lemma": "кафе",
+      "upos": "NOUN",
+      "count": 1,
+      "freq_rank": 1120,
+      "band": "A1",
+      "gloss": {
+        "lang": "de",
+        "text": "Kaffee"
+      }
+    },
+    {
+      "lemma": "ям",
+      "upos": "VERB",
+      "count": 1,
+      "freq_rank": 690,
+      "band": "A2",
+      "gloss": {
+        "lang": "de",
+        "text": "essen"
+      }
+    },
+    {
+      "lemma": "ябълка",
+      "upos": "NOUN",
+      "count": 1,
+      "freq_rank": 2450,
+      "band": "A1",
+      "gloss": {
+        "lang": "de",
+        "text": "Apfel"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Runtime artifacts
+out/
+*.apkg
+# ...but the committed sample deck is kept as a reference for a zero-setup test.
+!examples/sample-deck.apkg
+
+# OS
+.DS_Store
+
+# Internal project brief — not for the public repo
+CLAUDE-CODE-BRIEFING-*.md

@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "razbiram-anki"
+version = "0.1.0"
+description = "Turns razbiram-nlp's enriched Bulgarian documents into beautiful, well-structured Anki decks — morphology, contextual glosses, and CEFR levels included."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Leon Köllerwirth Hlihel" }]
+keywords = ["bulgarian", "anki", "flashcards", "language-learning", "cefr", "spaced-repetition"]
+dependencies = [
+    "genanki>=0.13",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "click>=8.1",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[project.urls]
+Homepage = "https://leonkoellerwirth.de"
+Repository = "https://github.com/leonkoellerwirth-arch/razbiram-anki"
+"Companion project" = "https://github.com/leonkoellerwirth-arch/razbiram-nlp"
+
+[project.scripts]
+razbiram-anki = "razbiram_anki.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+razbiram_anki = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
