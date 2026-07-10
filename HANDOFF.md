@@ -3,6 +3,62 @@
 Each entry is one work session. Written at session stop, read at session start.
 Concrete and honest.
 
+## 2026-07-10 (evening) — branch main
+
+**Done (all live-verified on 5 real decks + real `generate_manifests.py`):**
+- **Phase 3+4 built — the core was missing.** The old app only *stored* the dropped
+  file; the button was `disabled`, nothing parsed. New `src/crowdanki/`:
+  `deckJson.ts` (`.apkg → deck.json`, `::` tree, deterministic uuids), `uuid.ts`,
+  `cardType.ts` (mirrors `generate_manifests.py`), `loadDeckJson.ts` (pass-through),
+  `summary.ts`, `convert.ts` (unified entry), `download.ts` (bare `deck.json` / `.zip`
+  + `media/`). App now: drop → parse → preview (deck, count, real card-type chips,
+  sample cards) → download.
+- **Two inputs.** Accept `.apkg` **and** an existing CrowdAnki `deck.json` (validate
+  + pass through — the easy case, per owner).
+- **Fixed crash "Unexpected token '(' … not valid JSON".** Modern `.anki21b` exports
+  zstd-compress the `media` manifest (magic `28 b5 2f fd`) and its content is
+  **protobuf** (`MediaEntries`), not JSON. New `src/apkg/mediaManifest.ts` decodes
+  all three layouts (legacy JSON map / zstd+protobuf / empty). This also closed the
+  old "anki21b not fixture-tested" item.
+- **Fixed "empty json, very fast".** Root cause: the user's `.apkg` is **genuinely
+  empty** — verified by two independent tools (Anki's own `.anki21b` = 0 notes; the
+  CrowdAnki addon's folder `deck.json` = 0 notes/0 children). The 1 legacy note is
+  Anki's "Please update…" placeholder. Fix: **pick the collection via `meta`** (like
+  Anki), ignore compat stubs; and on 0 notes show a clear "no cards" message instead
+  of a silent empty `deck.json`. Real decks still convert (573 / 365+117media / 270 /
+  406).
+- **`deck.json` viewer** (owner request): CodeMirror 6 (`@uiw/react-codemirror` +
+  `@codemirror/lang-json` + `theme-one-dark`), mirroring the Studio's
+  `JsonSourceEditor`. Read-only, line numbers/folding/search, light+dark, "ansehen"
+  toggle + copy, **lazy-loaded** (main bundle stays 352 kB, CM in a 421 kB chunk).
+- Removed the **fake A2/B1 CEFR badges** (meaningless for arbitrary decks → invariant
+  §8) — replaced with real Anki card-type chips.
+- Gate PASS (tsc + vite build + **23 tests**), dev server HTTP 200.
+
+**Decided (see BIBLE §4, all ticked):** `.apkg→deck.json` built; two inputs
+(`.apkg` + CrowdAnki `deck.json`); collection selection is **`meta`-driven** (stubs
+ignored, empty → clear error); `.anki21b` zstd+protobuf media decoded; golden-set
+implemented; CodeMirror `deck.json` viewer added.
+
+**Open / blocked:**
+- **No README yet** — write the student-facing README (skeleton) and name the deck
+  round-trip golden-set. Nothing else names it.
+- **Ingest route still unconfirmed** — so the primary button is a **download**, not a
+  real 1-click "In razbiram.com übernehmen". Owner to confirm razbiram.com's route
+  (repo layout / path / token scopes) before that becomes a real upload.
+- Hub Mini-ADR (reverse role + CEFR table) still to write. schemaId migration pending.
+
+**Next:** student-facing **README** (name the golden-set), then wire the real
+razbiram.com **upload** once the ingest route is confirmed. Optionally: nicer 0-note
+UX (its own info card rather than the error card).
+
+**Continuity warnings:** theme © razbiram.com (attribute, don't relicense); output is
+**CrowdAnki `deck.json` only** — the app owns everything downstream; import the hub,
+don't copy; Bulgarian examples correct; the owner decides scope — execute, don't
+over-ask. Collection selection follows `meta`, not "newest wins" — don't revert it.
+
+---
+
 ## 2026-07-10 — branch main
 
 **Done:**

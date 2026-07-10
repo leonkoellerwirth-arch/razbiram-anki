@@ -51,13 +51,20 @@ constitution (`../razbiram-nlp/docs/razbiram-ECOSYSTEM.md`) still outranks it.
 
 ## §3 — Architecture map
 
-Web app (client-only): **parse** (`.apkg` → JSZip unzip → sql.js reads
-`collection.anki2`/`.anki21`/`.anki21b` → notes, models, decks, media) →
-**build `deck.json`** (mechanical transform into the CrowdAnki shape: `Deck`
-with `__type__`, `children` (the `::` tree), `note_models`, `notes`,
-`media_files`; deterministic `crowdanki_uuid`s so re-exports update) → **preview**
-(razbiram theme) → **download** the `deck.json` (+ media). `legacy/` holds the
-frozen Python forward bridge.
+Web app (client-only). Two inputs, one output:
+- **`.apkg`** → JSZip unzip → **pick collection via `meta`** → sql.js reads
+  `collection.anki2`/`.anki21`/`.anki21b` (zstd via fzstd) → notes, models, decks,
+  media (`mediaManifest.ts`: legacy JSON map *or* modern zstd+protobuf) →
+  **build `deck.json`** (`deckJson.ts`: CrowdAnki `Deck` with `__type__`, `children`
+  = the `::` tree, `note_models` at root, `notes`, `media_files`; deterministic
+  `crowdanki_uuid`s so re-exports update).
+- **`deck.json`** (an existing CrowdAnki export) → validate + pass through
+  (`loadDeckJson.ts`) — the easy case.
+
+Then **summary + preview** (`summary.ts`, card-type chips, sample cards, CodeMirror
+`deck.json` viewer) → **download** (`download.ts`: bare `deck.json`, or `.zip` with
+`media/`). 0-note `.apkg` → clear "no cards" error, never a silent empty file.
+`legacy/` holds the frozen Python forward bridge.
 
 ## §4 — Decision register
 
@@ -78,10 +85,30 @@ frozen Python forward bridge.
       table). (owner, 2026-07-10)
 - [x] **Forward Python CLI → `legacy/`**, frozen; not dual-maintained. (owner, 2026-07-10)
 - [x] **Theme © razbiram.com** carve-out, mirroring razbiram-nlp.
+- [x] **`.apkg → deck.json` built** (`src/crowdanki/`): deterministic-uuid tree
+      builder (root = full `::` path, children = leaf, models at root), JSON
+      pass-through for existing CrowdAnki `deck.json`, summary + card-type detection
+      mirroring `generate_manifests.py`, download (bare `deck.json` / `.zip` with
+      `media/`). App wired: drop → parse → preview → download. (2026-07-10)
+- [x] **Collection selection = `meta`-driven** (like Anki): the `meta` version picks
+      `.anki21b`/`.anki21`/`.anki2`; other members are compat stubs and are ignored
+      (a lone "Please update Anki" placeholder must never surface as a card). Empty
+      export → clear "0 Karten" message, not a silent empty `deck.json`. (2026-07-10)
+- [x] **`collection.anki21b` (zstd) support** — done and verified on 5 real modern
+      exports; the `media` manifest is zstd+protobuf (`MediaEntries`), decoded in
+      `src/apkg/mediaManifest.ts` (legacy JSON map still supported).
+- [x] **Golden-set (deck round-trip) implemented**: `deckJson.test.ts` runs
+      `.apkg → deck.json` through a mirror of the app's `collectModels/collectNotes`;
+      `mediaManifest`/`pickCollection`/`loadDeckJson` tested too (23 tests). Still to
+      name it in the README.
+- [x] **`deck.json` viewer in the app** — CodeMirror 6 (`@uiw/react-codemirror` +
+      `@codemirror/lang-json`), mirroring the Studio's `JsonSourceEditor`; read-only,
+      light+dark, lazy-loaded (code-split). (owner request, 2026-07-10)
 - [ ] **Hub Mini-ADR** in `razbiram-nlp/docs/adr/`: record razbiram-anki's reverse
       role + correct the ECOSYSTEM CEFR table to the Studio values.
 - [ ] **Confirm razbiram.com's real ingest route** for student decks: expected repo
-      layout, path convention, and GitHub token scopes.
+      layout, path convention, and GitHub token scopes. (Blocks a real 1-click
+      "In razbiram.com übernehmen" — today the concrete action is a download.)
 - [ ] **schemaId migration** `studywithme-bg.*` → `razbiram.*`, coordinated with the platform.
-- [ ] **`collection.anki21b` (zstd) support** in the parser — modern Anki exports.
-- [ ] Golden-set (deck round-trip) implemented and named in the README.
+- [ ] **README** — write the student-facing README (skeleton) and name the deck
+      round-trip golden-set in the methodology section.
