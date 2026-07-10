@@ -3,9 +3,12 @@ import type { ConvertResult } from "./convert";
 
 /** Package the result the way razbiram.com stores a deck: a `deck.json` plus a
  *  sibling `media/` folder. With media we hand back a `.zip` (drop-in for
- *  `anki/<Deck>/`); without, a bare `deck.json` is friendlier. */
-export async function downloadDeck(result: ConvertResult): Promise<void> {
-  const json = JSON.stringify(result.deck, null, 1);
+ *  `anki/<Deck>/`); without, a bare `deck.json` is friendlier.
+ *
+ *  `jsonOverride` lets the student download their edited deck.json verbatim
+ *  (the in-app editor); when omitted we serialise the generated deck. */
+export async function downloadDeck(result: ConvertResult, jsonOverride?: string): Promise<void> {
+  const json = jsonOverride ?? JSON.stringify(result.deck, null, 1);
   const folder = safeFolder(result.baseName);
 
   if (result.media.length === 0) {

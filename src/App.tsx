@@ -1,6 +1,8 @@
-import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { convertFile, type ConvertResult } from "./crowdanki/convert";
 import { downloadDeck } from "./crowdanki/download";
+import { loadDeckJson } from "./crowdanki/loadDeckJson";
+import { summarize } from "./crowdanki/summary";
 import { cardTypeLabel } from "./crowdanki/cardType";
 
 // CodeMirror is heavy and only needed once the student opens the preview — split it out.
@@ -187,24 +189,54 @@ export default function App() {
   );
 }
 
+type Validation =
+  | { kind: "pristine" }
+  | { kind: "valid"; deck: ReturnType<typeof loadDeckJson> }
+  | { kind: "invalid"; message: string };
+
 function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
   const [saving, setSaving] = useState(false);
   const [showJson, setShowJson] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { summary } = result;
-  const json = useMemo(() => JSON.stringify(result.deck, null, 1), [result]);
+
+  // The generated deck.json is the starting point; the student may edit `draft`
+  // before download. Reset the draft whenever a new file is converted.
+  const generated = useMemo(() => JSON.stringify(result.deck, null, 1), [result]);
+  const [draft, setDraft] = useState(generated);
+  useEffect(() => {
+    setDraft(generated);
+    setShowJson(false);
+  }, [generated]);
+
+  const edited = draft !== generated;
+  const validation: Validation = useMemo(() => {
+    if (!edited) return { kind: "pristine" };
+    try {
+      return { kind: "valid", deck: loadDeckJson(draft) };
+    } catch (err) {
+      return { kind: "invalid", message: err instanceof Error ? err.message : "Ungültige deck.json." };
+    }
+  }, [draft, edited]);
+
+  // Preview reflects valid edits live; falls back to the generated summary.
+  const summary = useMemo(
+    () => (validation.kind === "valid" ? summarize(validation.deck) : result.summary),
+    [validation, result.summary],
+  );
+  const canDownload = validation.kind !== "invalid";
 
   const onDownload = useCallback(() => {
     setSaving(true);
-    downloadDeck(result).finally(() => setSaving(false));
-  }, [result]);
+    const override = validation.kind === "valid" ? draft : undefined;
+    downloadDeck(result, override).finally(() => setSaving(false));
+  }, [result, validation, draft]);
 
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(json).then(() => {
+    navigator.clipboard.writeText(draft).then(() => {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     });
-  }, [json]);
+  }, [draft]);
 
   return (
     <div className="rz-card" style={{ marginTop: 20 }}>
@@ -213,6 +245,7 @@ function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
           <span key={t} className="rz-chip">{cardTypeLabel(t)}</span>
         ))}
         {summary.hasMedia && <span className="rz-chip">mit Medien</span>}
+        {edited && validation.kind === "valid" && <span className="rz-chip">bearbeitet</span>}
       </div>
 
       <div style={{ margin: "14px 0 4px", fontWeight: 700, fontSize: 18 }}>{summary.rootName}</div>
@@ -243,24 +276,40 @@ function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
       )}
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, alignItems: "center" }}>
-        <button className="rz-btn rz-btn-primary" onClick={onDownload} disabled={saving}>
+        <button className="rz-btn rz-btn-primary" onClick={onDownload} disabled={saving || !canDownload}>
           {saving ? "wird erstellt …" : result.media.length > 0 ? "deck.json + Medien herunterladen" : "deck.json herunterladen"}
         </button>
         <button className="rz-btn" onClick={() => setShowJson((v) => !v)} aria-expanded={showJson}>
-          {showJson ? "deck.json ausblenden" : "deck.json ansehen"}
+          {showJson ? "Editor schließen" : "deck.json bearbeiten"}
         </button>
         {showJson && (
           <button className="rz-btn" onClick={onCopy}>{copied ? "kopiert ✓" : "kopieren"}</button>
         )}
+        {edited && (
+          <button className="rz-btn" onClick={() => setDraft(generated)}>zurücksetzen</button>
+        )}
       </div>
-      <div className="rz-faint" style={{ marginTop: 8, fontSize: 13 }}>
-        Lade die Datei anschließend in razbiram.com hoch.
-      </div>
+
+      {showJson ? (
+        <div style={{ marginTop: 8, fontSize: 13 }} className={validation.kind === "invalid" ? "" : "rz-faint"}>
+          {validation.kind === "invalid" ? (
+            <span style={{ color: "var(--primary)" }}>⚠ {validation.message} — Download nutzt bis dahin die Originaldatei.</span>
+          ) : validation.kind === "valid" ? (
+            <span>✓ Gültige deck.json — der Download enthält deine Änderungen.</span>
+          ) : (
+            <span>Bearbeite die deck.json direkt hier; der Download übernimmt gültige Änderungen.</span>
+          )}
+        </div>
+      ) : (
+        <div className="rz-faint" style={{ marginTop: 8, fontSize: 13 }}>
+          Lade die Datei anschließend in razbiram.com hoch.
+        </div>
+      )}
 
       {showJson && (
         <div style={{ marginTop: 14 }}>
           <Suspense fallback={<div className="rz-faint">Editor wird geladen …</div>}>
-            <DeckJsonViewer value={json} dark={dark} />
+            <DeckJsonViewer value={draft} dark={dark} onChange={setDraft} />
           </Suspense>
         </div>
       )}
