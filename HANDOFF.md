@@ -27,9 +27,21 @@ Concrete and honest.
   toggle. App shell: node-mark wordmark, `.apkg` dropzone (reads the file, no
   conversion yet), razbiram-coherent look. `npm run build` green (tsc strict + vite).
 
-**Decided (see BIBLE §4):** reverse direction = focus; standalone web app;
-per-student private repo + token; output `vocab.v1` + CrowdAnki fallback; CEFR
-scale = Studio (emerald→amber); forward CLI frozen in `legacy/`; theme © razbiram.com.
+- **Mapped the real app pipeline** (`~/dev/ai/studywithme-bg`, via subagent):
+  raw `.apkg` parsing exists **nowhere** in the ecosystem — that whole step is the
+  gap. The app consumes CrowdAnki JSON and has a full adapter chain
+  (`ankiNoteParser` → `ankiDeckAdapter` → mcq/flashcard/occlusion + mixed-basic).
+  It reads `studywithme_db` **read-only via a server token** (no per-student repo,
+  no in-app push). A student **upload** surface already exists at `/learn/decks`
+  (`POST /me/decks`) that accepts the app's **LearnDeck JSON**.
+- **Corrected two earlier decisions** from this ground truth (BIBLE §4): output =
+  **LearnDeck JSON** (uploadable today), not vocab.v1/CrowdAnki; and there is no
+  per-student GitHub repo — the primary path is local file → `/learn/decks`.
+
+**Decided (see BIBLE §4):** reverse direction = focus; standalone web app; output =
+LearnDeck JSON via the existing `/learn/decks` upload; reuse by **mirroring** the
+app's adapter chain (public MIT can't import the private app); CEFR scale = Studio
+(emerald→amber); forward CLI frozen in `legacy/`; theme © razbiram.com.
 
 **Open / blocked:**
 - Hub Mini-ADR still to write (reverse role + CEFR table correction).
@@ -39,9 +51,11 @@ scale = Studio (emerald→amber); forward CLI frozen in `legacy/`; theme © razb
 - Reorg + governance + scaffold are **uncommitted** — public repo still shows the
   old Python-only layout until the next commit/push.
 
-**Next:** Phase 2 — the `.apkg` parser (`src/apkg/`: JSZip unzip → sql.js read
-`collection.anki2` → notes/models/media) with the deck round-trip golden-set,
-then Phase 3 convert (`vocab.v1` + CrowdAnki).
+**Next:** Phase 3 — port the app's adapter chain into `src/adapt/` (from
+`~/dev/ai/studywithme-bg/app/src/lib/adapters/*` + `utils/sanitizeAnkiHtml`),
+feed it CrowdAnki shapes built from the parser, emit **LearnDeck JSON**. Golden-set:
+`.apkg` → LearnDeck passes the app's `isLearnCardShape` and matches `adaptCrowdAnkiDeck`
+card types/counts. Then Phase 4 UI (preview + download) + README.
 
 **Continuity warnings:** the `web/` theme is razbiram product IP — attribute, don't
 relicense. The student's GitHub token is browser-only. Import razbiram-nlp from the
