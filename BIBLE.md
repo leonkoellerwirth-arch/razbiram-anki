@@ -9,9 +9,8 @@ constitution (`../razbiram-nlp/docs/razbiram-ECOSYSTEM.md`) still outranks it.
 **The public, MIT-licensed Anki bridge of the razbiram ecosystem.** Two directions:
 
 - **Reverse (current focus).** A student's existing Anki `.apkg` → **CrowdAnki
-  `deck.json`** — exactly the format razbiram.com reads from
-  `studywithme_db/app/studywithme-bg/anki/<Deck>/deck.json`. That is the whole
-  job. A **standalone web app** (Vite + React 19 + Tailwind v4 + TS, mirroring
+  `deck.json`** — exactly the format razbiram.com reads from its own content
+  store. That is the whole job. A **standalone web app** (Vite + React 19 + Tailwind v4 + TS, mirroring
   `razbiram-nlp/web`) that runs fully client-side: parse → build `deck.json`
   (+ media) → **optionally restyle** → download as `deck.json` **or `.apkg`**.
   (Ground truth: raw `.apkg` parsing exists nowhere in the ecosystem — this is
@@ -90,12 +89,13 @@ clear "no cards" error, never a silent empty file.
 - [x] **Reverse direction is the current focus** — standalone web app; per-student
       private GitHub repo + token. (owner, 2026-07-10)
 - [x] **Output format** — the parser produces **CrowdAnki `deck.json`**, exactly the
-      format razbiram.com reads from `studywithme_db/.../anki/<Deck>/deck.json`.
-      That is the whole job; nothing more. (owner, 2026-07-10)
-- [x] **GitHub reality** — the app reads `HamudiLeon/studywithme_db` **read-only via
-      a server token**; no per-student repo, no in-app push. The primary path is
-      local file → `/learn/decks` upload, not a GitHub push. (corrects the earlier
-      per-student-repo+token choice.)
+      format razbiram.com reads from its own content store. That is the whole job;
+      nothing more. (owner, 2026-07-10)
+- [x] **No GitHub in the student path** — the platform reads its own content store
+      server-side; there is no per-student repo and no in-app push. The primary
+      path is a local file the student uploads in the platform, not a GitHub push.
+      (corrects the earlier per-student-repo+token choice.) Platform-internal
+      repo names and paths stay out of this public file — ECOSYSTEM §7.
 - [x] **Reuse by format-compatibility** — produce the exact CrowdAnki `deck.json`
       shape the app's `ankiNoteParser.prepareCrowdAnkiNotes` already reads (and that
       `generate_manifests.py` classifies). No adapter port: the app owns everything

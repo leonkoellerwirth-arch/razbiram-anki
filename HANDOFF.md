@@ -147,7 +147,7 @@ over-ask. Collection selection follows `meta`, not "newest wins" — don't rever
 - **Pivot, per owner direction**: the reverse direction is the real product —
   a student's `.apkg` → razbiram.com. Mapped the ecosystem: razbiram.com ingests
   **CrowdAnki** `deck.json` + `deck.info.json` + media + `anki.manifest.json`
-  from GitHub (format confirmed by reading `studywithme_db`), with simpler
+  from its content store (format confirmed by reading it directly), with simpler
   `studywithme-bg.vocab.v1` for flat vocab decks. `generate_manifests.py` is the
   coherence anchor for card-type detection + the deck.info schema.
 - **Read the family constitution** (`razbiram-nlp/docs/razbiram-ECOSYSTEM.md`).
@@ -164,12 +164,12 @@ over-ask. Collection selection follows `meta`, not "newest wins" — don't rever
   raw `.apkg` parsing exists **nowhere** in the ecosystem — that whole step is the
   gap. The app consumes CrowdAnki JSON and has a full adapter chain
   (`ankiNoteParser` → `ankiDeckAdapter` → mcq/flashcard/occlusion + mixed-basic).
-  It reads `studywithme_db` **read-only via a server token** (no per-student repo,
+  It reads its content store **server-side, read-only** (no per-student repo,
   no in-app push). A student **upload** surface already exists at `/learn/decks`
   (`POST /me/decks`) that accepts the app's **LearnDeck JSON**.
 - **Owner set the final output (definitive):** the parser produces **CrowdAnki
   `deck.json`** — exactly the format razbiram.com reads from
-  `studywithme_db/app/studywithme-bg/anki/<Deck>/deck.json`. That is the whole job.
+  its own content store. That is the whole job.
   No LearnDeck adapter port (the app owns everything downstream of `deck.json`);
   no per-student GitHub repo. Earlier vocab.v1 / LearnDeck framings are superseded.
 
@@ -189,7 +189,7 @@ turn `ParsedApkg` into a CrowdAnki `deck.json`: a `Deck` (`__type__`, `name`,
 `crowdanki_uuid`, `children` = the `::` tree, `note_models`, `notes`, `media_files`),
 deterministic `crowdanki_uuid`s (stable re-export = update), notes referencing their
 model's uuid. Match the real shape in
-`studywithme_db/app/studywithme-bg/anki/Varna__Biologie/deck.json`. Golden-set:
+a real deck in the platform's content store. Golden-set:
 `.apkg` → `deck.json` → feed a small `prepareCrowdAnkiNotes` mirror and assert the
 notes/models/fields survive; run the file through `generate_manifests.py` logic and
 check card-type detection. Then Phase 4 UI (drop → preview → download `deck.json` +
