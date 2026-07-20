@@ -23,3 +23,22 @@ SOFTWARE.
 Anki is a trademark of its respective owners. This project is an unofficial
 community tool and is not affiliated with, endorsed by, or sponsored by the
 Anki project or its maintainers.
+
+---
+
+VISUAL IDENTITY — NOT COVERED BY THE MIT LICENCE ABOVE
+
+The razbiram visual identity is (c) razbiram.com and is expressly excluded from
+the permission granted above. It covers, without limitation:
+
+  - the colour system (the warm palette, the coral accent #e2533c, the CEFR
+    band scale) as expressed in src/styles.css and src/style/cardTheme.ts,
+  - the type choices (Manrope / Unbounded / PT Serif),
+  - the "razb.i.ram" wordmark and the node-mark,
+  - the card design these produce, which ships inside every styled deck this
+    software exports.
+
+You may use, modify and redistribute the SOFTWARE under the MIT terms above.
+You may not adopt the visual identity as your own, relicense it, or present a
+derived product as a razbiram product. Attribution of the identity to
+razbiram.com must be retained where it appears.
