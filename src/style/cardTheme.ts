@@ -312,8 +312,14 @@ code, pre {
 }
 `;
 
-/** The one place the platform is described to students. Reword here only. */
-export const RAZBIRAM_TAGLINE = "Kostenlos für Lernende";
+/** The one place the platform is described to students. Reword here only.
+ *
+ *  Deliberately carries **no price claim**. These cards travel: they end up in
+ *  other people's Anki collections and get shared on, and they keep saying
+ *  whatever they say for years. A "free" promise would outlive the pricing it
+ *  describes. What is free today belongs on the pricing page, which can change;
+ *  the card gets the part that stays true. */
+export const RAZBIRAM_TAGLINE = "Bulgarisch lernen";
 
 export const RAZBIRAM_URL = "https://razbiram.com";
 

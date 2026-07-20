@@ -27,7 +27,10 @@ style is a **toggle**, original models preserved.
   coral accent, Studio CEFR scale, full night mode via all four Anki selectors;
   the signature; an ES5 card script) + `applyStyle.ts`.
 - **Signature**: back face only — `razb·i·ram`, a real link to razbiram.com, and
-  **"Kostenlos für Lernende"**, isolated as `RAZBIRAM_TAGLINE`.
+  a tagline isolated as `RAZBIRAM_TAGLINE`. It said "Kostenlos für Lernende"
+  until the platform's own pricing page turned out to say "free during our
+  pilot" — shared cards outlive the pricing they state, so the tagline now
+  carries no price claim at all (owner decision).
 - **Example deck** (`src/example/exampleDeck.ts`): 6 Bulgarian words, 3 CEFR
   bands, German glosses, downloadable from the landing page as `.apkg`.
 - **UI**: style toggle, `.apkg für Anki` button, example-deck link under the

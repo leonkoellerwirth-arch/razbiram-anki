@@ -26,7 +26,7 @@ Kurz gesagt:
 3. Herunterladen — als **.apkg** für dein Anki oder als **deck.json** für razbiram.com.
 
 **Deine Karten verlassen deinen Computer nicht.** Kein Konto, keine
-Nachverfolgung, keine Kosten.
+Nachverfolgung, keine Kosten — dieses Werkzeug ist quelloffen und bleibt kostenlos.
 
 So sehen die Karten danach aus, hell und dunkel:
 

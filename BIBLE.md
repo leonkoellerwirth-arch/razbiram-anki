@@ -159,9 +159,12 @@ clear "no cards" error, never a silent empty file.
       answers "flashcard" for anything unclassified, and a template rewrite would
       silently drop fields off richer cards. (2026-07-20)
 - [x] **Card signature** — back face only: the `razb·i·ram` wordmark, a real link
-      to razbiram.com and the tagline **"Kostenlos für Lernende"**, isolated in
-      `RAZBIRAM_TAGLINE` so the wording changes in one place. Never on the front:
-      the question surface stays free. (owner, 2026-07-20)
+      to razbiram.com and a tagline, isolated in `RAZBIRAM_TAGLINE` so the wording
+      changes in one place. Never on the front: the question surface stays free.
+      **The tagline carries no price claim** — these cards get shared and outlive
+      any pricing they would state. It said "Kostenlos für Lernende" until the
+      platform's own page turned out to say "free during our pilot"; a promise the
+      card cannot keep does not belong on it. (owner, 2026-07-20)
 - [x] **Example deck** — six Bulgarian words (A1/A2/B1) with German glosses,
       downloadable from the landing page. BIBLE §8 applies: each entry and each
       example sentence was checked; anything uncertain was left out. (2026-07-20)

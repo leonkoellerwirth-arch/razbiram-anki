@@ -99,8 +99,9 @@ const HELP: { q: string; a: React.ReactNode }[] = [
     q: "Kostet das etwas?",
     a: (
       <>
-        Nein. Dieses Werkzeug ist kostenlos und quelloffen, und razbiram.com ist für
-        Lernende kostenlos.
+        Dieses Werkzeug ist kostenlos und quelloffen — für immer, das steht in der
+        Lizenz. razbiram.com ist derzeit in der Pilotphase und dort ebenfalls
+        kostenlos; was danach gilt, steht auf der Preisseite von razbiram.com.
       </>
     ),
   },
