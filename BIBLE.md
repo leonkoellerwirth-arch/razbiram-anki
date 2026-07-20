@@ -13,9 +13,12 @@ constitution (`../razbiram-nlp/docs/razbiram-ECOSYSTEM.md`) still outranks it.
   `studywithme_db/app/studywithme-bg/anki/<Deck>/deck.json`. That is the whole
   job. A **standalone web app** (Vite + React 19 + Tailwind v4 + TS, mirroring
   `razbiram-nlp/web`) that runs fully client-side: parse → build `deck.json`
-  (+ media) → download. (Ground truth: raw `.apkg` parsing exists nowhere in the
-  ecosystem — this is the whole gap. Everything downstream of `deck.json`
-  already exists in the app.)
+  (+ media) → **optionally restyle** → download as `deck.json` **or `.apkg`**.
+  (Ground truth: raw `.apkg` parsing exists nowhere in the ecosystem — this is
+  the whole gap. Everything downstream of `deck.json` already exists in the app.)
+  Since 2026-07-20 the app also hands the student their deck *back* in the
+  razbiram style, as a real `.apkg` for their own Anki — razbiram.com still reads
+  only `deck.json`, so that side of the contract is unchanged.
 - **Forward (frozen in `legacy/`).** `EnrichedDocument` → styled Anki `.apkg`
   via genanki + an AnkiConnect live-sync. Kept as reference, not dual-maintained.
 
@@ -31,7 +34,9 @@ constitution (`../razbiram-nlp/docs/razbiram-ECOSYSTEM.md`) still outranks it.
    single constant, so the migration is a one-line change.
 4. **Theme is razbiram product IP.** The visual theme is **© razbiram.com**, not
    covered by MIT. The token stylesheet carries a © header; LICENSE notes it.
-   Attribute it; never relicense it.
+   Attribute it; never relicense it. This now also travels *outside* the app:
+   `src/style/cardTheme.ts` ships inside every styled deck a student downloads,
+   so it carries the same © notice inside the CSS string itself.
 5. **CEFR scale = Studio.** Emerald→teal→blue→indigo→violet→amber (A1 `#d1fae5`/
    `#047857` … C2 `#fef3c7`/`#b45309`), verified against `razbiram-nlp/web/src/
    styles.css`. Identical everywhere. (The ECOSYSTEM table's green→red values are
@@ -62,8 +67,22 @@ Web app (client-only). Two inputs, one output:
   (`loadDeckJson.ts`) — the easy case.
 
 Then **summary + preview** (`summary.ts`, card-type chips, sample cards, CodeMirror
-`deck.json` viewer) → **download** (`download.ts`: bare `deck.json`, or `.zip` with
-`media/`). 0-note `.apkg` → clear "no cards" error, never a silent empty file.
+`deck.json` viewer) → optional **razbiram style** → **download**. 0-note `.apkg` →
+clear "no cards" error, never a silent empty file.
+
+- **Style** (`src/style/`): `cardTheme.ts` holds the card CSS, the signature and
+  the ES5 card script; `applyStyle.ts` maps them onto note models. CSS is always
+  replaced; **templates only for models with exactly two fields**, because
+  `detectCardType` calls everything it cannot place a "flashcard" and rewriting a
+  9-field vocabulary model to front/back would drop content off the card.
+- **Write** (`src/apkg/write.ts`): CrowdAnki deck → schema-11 `collection.anki2`
+  via sql.js (no new dependency) → `.apkg`. Note GUIDs are preserved so a
+  re-import updates; ids come from `stableId` so re-exports are stable.
+- **Example deck** (`src/example/exampleDeck.ts`): six verified Bulgarian words
+  across three CEFR bands, downloadable before the student has any deck of
+  their own.
+- **Download** (`download.ts`): bare `deck.json`, `.zip` with `media/`, or `.apkg`.
+
 `legacy/` holds the frozen Python forward bridge.
 
 ## §4 — Decision register
@@ -104,6 +123,30 @@ Then **summary + preview** (`summary.ts`, card-type chips, sample cards, CodeMir
 - [x] **`deck.json` viewer in the app** — CodeMirror 6 (`@uiw/react-codemirror` +
       `@codemirror/lang-json`), mirroring the Studio's `JsonSourceEditor`; read-only,
       light+dark, lazy-loaded (code-split). (owner request, 2026-07-10)
+- [x] **Students get the razbiram style in their own Anki** — the app restyles a
+      converted deck and exports a real `.apkg`. Toggle, default **off**: the
+      student's original note models are kept and restored when it is switched
+      back. (owner, 2026-07-20)
+- [x] **Both delivery formats** — the style lives in the `note_models` of the
+      `deck.json` *and* in a `.apkg`, so no CrowdAnki add-on is needed to import
+      it. Extends the former "deck.json only" output rule deliberately;
+      razbiram.com's own ingest contract is untouched. (owner, 2026-07-20)
+- [x] **`.apkg` writer targets schema 11** (`collection.anki2`), sql.js, no new
+      dependency. The DDL and the `col` JSON blob shapes were dumped from a real
+      deck, and the output was imported with **Anki's own Python importer**
+      (notes, cards, deck tree, notetype, fields, tags all intact) — verified,
+      not assumed. (2026-07-20)
+- [x] **Templates are only rewritten for two-field models**; everything else gets
+      CSS only. Narrower than the design proposed, because `detectCardType`
+      answers "flashcard" for anything unclassified, and a template rewrite would
+      silently drop fields off richer cards. (2026-07-20)
+- [x] **Card signature** — back face only: the `razb·i·ram` wordmark, a real link
+      to razbiram.com and the tagline **"Kostenlos für Lernende"**, isolated in
+      `RAZBIRAM_TAGLINE` so the wording changes in one place. Never on the front:
+      the question surface stays free. (owner, 2026-07-20)
+- [x] **Example deck** — six Bulgarian words (A1/A2/B1) with German glosses,
+      downloadable from the landing page. BIBLE §8 applies: each entry and each
+      example sentence was checked; anything uncertain was left out. (2026-07-20)
 - [ ] **Hub Mini-ADR** in `razbiram-nlp/docs/adr/`: record razbiram-anki's reverse
       role + correct the ECOSYSTEM CEFR table to the Studio values.
 - [ ] **Confirm razbiram.com's real ingest route** for student decks: expected repo

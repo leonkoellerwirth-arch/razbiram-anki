@@ -178,6 +178,22 @@ body {
 .rz-btn:hover { background: var(--surface-2); }
 .rz-btn:active { transform: translateY(1px); }
 .rz-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* A button that reads as a link — for secondary actions that must not compete
+   with the primary one (the example-deck download under the dropzone). */
+.rz-link {
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rz-link:hover { color: var(--primary-2); }
+.rz-link:disabled { opacity: 0.5; cursor: not-allowed; }
 .rz-btn-primary {
   background: var(--primary);
   color: var(--on-primary);

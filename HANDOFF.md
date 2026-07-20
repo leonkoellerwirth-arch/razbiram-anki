@@ -3,6 +3,68 @@
 Each entry is one work session. Written at session stop, read at session start.
 Concrete and honest.
 
+## 2026-07-20 — branch main
+
+**Task (owner):** students should get the razbiram.com style in *their own* Anki —
+a downloadable styled deck, plus an example deck to try, carrying a razbiram.com
+signature that says the platform is free for learners. Design commissioned from a
+Fable 5 designer + solution architect, then implemented.
+
+**Decided up front (owner):** both delivery formats (`deck.json` **and** `.apkg`);
+style is a **toggle**, original models preserved.
+
+**Done — all verified against Anki itself, not just our own parser:**
+- **`.apkg` writer** (`src/apkg/write.ts`, `writeApkg`). The repo could read
+  `.apkg` but not write one. Schema 11 (`collection.anki2`) via sql.js — no new
+  dependency. **The DDL and the `col` JSON blob shapes were dumped from a real
+  deck with `sqlite3 .schema`, not written from memory**, and the emitted file was
+  imported with **Anki's own Python library**: 11 notes, 22 cards, deck tree
+  `razbiram::Texte::Meine Familie`, notetype, fields and tags all intact. That was
+  the design's one HIGH risk; it is now closed. Note GUIDs carry over (re-import
+  updates, never duplicates); ids come from a new `stableId` so re-exports are
+  stable. 12 round-trip tests assert the far side field for field.
+- **Style module** (`src/style/`): `cardTheme.ts` (card CSS with the warm palette,
+  coral accent, Studio CEFR scale, full night mode via all four Anki selectors;
+  the signature; an ES5 card script) + `applyStyle.ts`.
+- **Signature**: back face only — `razb·i·ram`, a real link to razbiram.com, and
+  **"Kostenlos für Lernende"**, isolated as `RAZBIRAM_TAGLINE`.
+- **Example deck** (`src/example/exampleDeck.ts`): 6 Bulgarian words, 3 CEFR
+  bands, German glosses, downloadable from the landing page as `.apkg`.
+- **UI**: style toggle, `.apkg für Anki` button, example-deck link under the
+  dropzone; new `.rz-link` style. Driven in a real headless browser — deck
+  dropped, toggle ticked, no console errors.
+- Gate PASS, **59 tests** (was 39). Cards screenshotted in light and dark.
+
+**Deliberate deviations from the commissioned design (both are the point, not
+shortcuts):**
+1. **Templates are rewritten only for two-field models.** The architect proposed
+   rewriting everything `detectCardType` calls a "flashcard" — but that classifier
+   answers "flashcard" for anything it cannot place, including 9-field vocabulary
+   models, so the rewrite would have silently dropped example sentences and CEFR
+   fields off the card. Everything else gets CSS only and keeps its own layout.
+2. **The elaborate cloze / MCQ / image-occlusion templates were not implemented.**
+   They only apply to models we now deliberately leave alone. The design document
+   keeps them for when that changes.
+
+**Open / blocked (unchanged from the last session):**
+- **Still no student-facing README** — and the existing `README.md` is *stale*: it
+  documents the pre-pivot Python CLI (AnkiConnect, `.apkg` output), not this app.
+  It needs a rewrite to the family skeleton, naming the round-trip golden-set.
+- **Ingest route still unconfirmed** — the primary action remains a download.
+- Hub Mini-ADR still to write; schemaId migration pending.
+
+**Next:** the README rewrite. Then, optionally, a live card preview in the app
+(the style is currently invisible until the student imports the file) — that is
+the one thing the design specified and the UI does not yet do.
+
+**Continuity warnings:** theme © razbiram.com now travels *inside* every
+downloaded deck — the notice lives in the CSS string itself, keep it there;
+razbiram.com's ingest contract is still `deck.json` only, the `.apkg` is for the
+student's own Anki; templates stay untouched for models with more than two
+fields; the CEFR scale is the Studio's and a test asserts it.
+
+---
+
 ## 2026-07-10 (evening) — branch main
 
 **Done (all live-verified on 5 real decks + real `generate_manifests.py`):**

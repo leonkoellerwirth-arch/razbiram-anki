@@ -1,6 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { convertFile, type ConvertResult } from "./crowdanki/convert";
-import { downloadDeck } from "./crowdanki/download";
+import { downloadApkg, downloadDeck } from "./crowdanki/download";
+import { applyRazbiramStyle } from "./style/applyStyle";
+import { buildExampleDeck, EXAMPLE_DECK_NAME } from "./example/exampleDeck";
+import type { CrowdAnkiDeck } from "./crowdanki/types";
 import { loadDeckJson } from "./crowdanki/loadDeckJson";
 import { summarize } from "./crowdanki/summary";
 import { cardTypeLabel } from "./crowdanki/cardType";
@@ -163,6 +166,8 @@ export default function App() {
           )}
         </div>
 
+        <ExampleDeckLink />
+
         {status.phase === "converting" && (
           <div className="rz-card rz-muted" style={{ marginTop: 20 }}>
             Karten werden gelesen …
@@ -189,6 +194,35 @@ export default function App() {
   );
 }
 
+/** A student with no deck of their own still gets to see the razbiram style: one
+ *  quiet secondary action under the dropzone, never competing with it. */
+function ExampleDeckLink() {
+  const [state, setState] = useState<"idle" | "busy" | "failed">("idle");
+
+  const onDownload = useCallback(() => {
+    setState("busy");
+    downloadApkg(buildExampleDeck(), [], "razbiram-beispieldeck")
+      .then(() => setState("idle"))
+      .catch(() => setState("failed"));
+  }, []);
+
+  return (
+    <div className="rz-faint" style={{ marginTop: 12, fontSize: 14, textAlign: "center" }}>
+      {state === "failed" ? (
+        <span>Das Beispieldeck konnte nicht erstellt werden — bitte neu laden.</span>
+      ) : (
+        <>
+          Noch kein Deck?{" "}
+          <button className="rz-link" onClick={onDownload} disabled={state === "busy"}>
+            {state === "busy" ? "wird erstellt …" : `„${EXAMPLE_DECK_NAME}“ herunterladen`}
+          </button>{" "}
+          — sechs bulgarische Wörter im razbiram-Stil, direkt für Anki.
+        </>
+      )}
+    </div>
+  );
+}
+
 type Validation =
   | { kind: "pristine" }
   | { kind: "valid"; deck: ReturnType<typeof loadDeckJson> }
@@ -196,12 +230,22 @@ type Validation =
 
 function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
   const [saving, setSaving] = useState(false);
+  const [savingApkg, setSavingApkg] = useState(false);
   const [showJson, setShowJson] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [styled, setStyled] = useState(false);
+
+  // The style toggle swaps the note models' css/templates. The student's original
+  // models are never discarded — switching the toggle off restores them exactly.
+  const models = (result.deck as CrowdAnkiDeck).note_models;
+  const activeDeck = useMemo(() => {
+    if (!styled || !models || models.length === 0) return result.deck;
+    return { ...result.deck, note_models: applyRazbiramStyle(models).styled };
+  }, [styled, models, result.deck]);
 
   // The generated deck.json is the starting point; the student may edit `draft`
   // before download. Reset the draft whenever a new file is converted.
-  const generated = useMemo(() => JSON.stringify(result.deck, null, 1), [result]);
+  const generated = useMemo(() => JSON.stringify(activeDeck, null, 1), [activeDeck]);
   const [draft, setDraft] = useState(generated);
   useEffect(() => {
     setDraft(generated);
@@ -227,9 +271,15 @@ function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
 
   const onDownload = useCallback(() => {
     setSaving(true);
-    const override = validation.kind === "valid" ? draft : undefined;
-    downloadDeck(result, override).finally(() => setSaving(false));
-  }, [result, validation, draft]);
+    // Always hand over the JSON currently on screen — styled, edited, or neither.
+    downloadDeck(result, draft).finally(() => setSaving(false));
+  }, [result, draft]);
+
+  const onDownloadApkg = useCallback(() => {
+    setSavingApkg(true);
+    const deck = (validation.kind === "valid" ? validation.deck : activeDeck) as CrowdAnkiDeck;
+    downloadApkg(deck, result.media, result.baseName).finally(() => setSavingApkg(false));
+  }, [validation, activeDeck, result]);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(draft).then(() => {
@@ -275,9 +325,24 @@ function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
         </ul>
       )}
 
+      {models && models.length > 0 && (
+        <label
+          style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, cursor: "pointer" }}
+        >
+          <input type="checkbox" checked={styled} onChange={(e) => setStyled(e.target.checked)} />
+          <span style={{ fontWeight: 600 }}>razbiram-Stil anwenden</span>
+          <span className="rz-faint" style={{ fontSize: 13 }}>
+            dein Original bleibt erhalten — Häkchen weg, und alles ist wie vorher
+          </span>
+        </label>
+      )}
+
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, alignItems: "center" }}>
         <button className="rz-btn rz-btn-primary" onClick={onDownload} disabled={saving || !canDownload}>
           {saving ? "wird erstellt …" : result.media.length > 0 ? "deck.json + Medien herunterladen" : "deck.json herunterladen"}
+        </button>
+        <button className="rz-btn" onClick={onDownloadApkg} disabled={savingApkg || !canDownload}>
+          {savingApkg ? "wird erstellt …" : ".apkg für Anki"}
         </button>
         <button className="rz-btn" onClick={() => setShowJson((v) => !v)} aria-expanded={showJson}>
           {showJson ? "Editor schließen" : "deck.json bearbeiten"}

@@ -1,5 +1,9 @@
 import JSZip from "jszip";
 import type { ConvertResult } from "./convert";
+import type { CrowdAnkiDeck } from "./types";
+import type { ApkgMedia } from "../apkg/types";
+import { loadSqlJs } from "../apkg/sqlite";
+import { writeApkg } from "../apkg/write";
 
 /** Package the result the way razbiram.com stores a deck: a `deck.json` plus a
  *  sibling `media/` folder. With media we hand back a `.zip` (drop-in for
@@ -21,6 +25,19 @@ export async function downloadDeck(result: ConvertResult, jsonOverride?: string)
   for (const m of result.media) zip.file(`media/${m.name}`, m.bytes);
   const blob = await zip.generateAsync({ type: "blob" });
   triggerDownload(blob, `${folder}.zip`);
+}
+
+/** The other way out: a real `.apkg`. razbiram.com reads `deck.json`, but Anki
+ *  itself reads `.apkg` — this is the file a student imports by double-clicking,
+ *  with no CrowdAnki add-on involved. */
+export async function downloadApkg(
+  deck: CrowdAnkiDeck,
+  media: ApkgMedia[],
+  baseName: string,
+): Promise<void> {
+  const SQL = await loadSqlJs();
+  const blob = await writeApkg(deck, media, SQL);
+  triggerDownload(blob, `${safeFolder(baseName)}.apkg`);
 }
 
 function safeFolder(name: string): string {
