@@ -7,6 +7,7 @@ import type { CrowdAnkiDeck } from "./crowdanki/types";
 import { loadDeckJson } from "./crowdanki/loadDeckJson";
 import { summarize } from "./crowdanki/summary";
 import { cardTypeLabel } from "./crowdanki/cardType";
+import { Guide } from "./Guide";
 
 // CodeMirror is heavy and only needed once the student opens the preview — split it out.
 const DeckJsonViewer = lazy(() => import("./DeckJsonViewer"));
@@ -123,12 +124,16 @@ export default function App() {
 
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "8px 20px 64px" }}>
         <h1 style={{ fontSize: 30, lineHeight: 1.15, margin: "18px 0 8px", letterSpacing: "-0.01em" }}>
-          Dein Anki-Deck, bereit für razbiram.com
+          Deine Anki-Karten, im razbiram-Stil
         </h1>
         <p className="rz-muted" style={{ fontSize: 18, margin: "0 0 24px", maxWidth: 560 }}>
-          Hast du ein Anki-Deck — eigenes oder von Freunden? Zieh es hier rein (<code>.apkg</code> oder eine
-          fertige <code>deck.json</code>), sieh dir die Karten an und lade es für razbiram.com herunter.
-          Kein Terminal, keine Installation.
+          Du hast ein Anki-Deck — eigenes oder von Freunden? Zieh es hier herein. Du siehst
+          sofort, was drin ist, und lädst es wieder herunter: für dein Anki oder für
+          razbiram.com. Nichts installieren, nichts anmelden, kostenlos.
+        </p>
+        <p className="rz-muted" style={{ fontSize: 15, margin: "-14px 0 24px", maxWidth: 560 }}>
+          Du weißt nicht, wie du dein Deck aus Anki herausbekommst?{" "}
+          <a href="#anleitung">Hier ist die Anleitung.</a>
         </p>
 
         <div
@@ -158,10 +163,11 @@ export default function App() {
             </>
           ) : (
             <>
-              <div style={{ fontWeight: 700, fontSize: 18 }}>
-                Anki-Deck (.apkg) oder deck.json hierher ziehen
+              <div style={{ fontWeight: 700, fontSize: 18 }}>Dein Anki-Deck hierher ziehen</div>
+              <div className="rz-muted" style={{ marginTop: 4 }}>oder klicken zum Auswählen</div>
+              <div className="rz-faint" style={{ marginTop: 6, fontSize: 13 }}>
+                die Datei aus Ankis Export — sie endet auf .apkg
               </div>
-              <div className="rz-faint" style={{ marginTop: 4 }}>oder klicken zum Auswählen</div>
             </>
           )}
         </div>
@@ -182,6 +188,8 @@ export default function App() {
         )}
 
         {status.phase === "done" && <Result result={status.result} dark={theme === "dark"} />}
+
+        <Guide />
       </main>
 
       <footer

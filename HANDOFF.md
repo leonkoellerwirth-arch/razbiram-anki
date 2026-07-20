@@ -46,16 +46,31 @@ shortcuts):**
    They only apply to models we now deliberately leave alone. The design document
    keeps them for when that changes.
 
-**Open / blocked (unchanged from the last session):**
-- **Still no student-facing README** — and the existing `README.md` is *stale*: it
-  documents the pre-pivot Python CLI (AnkiConnect, `.apkg` output), not this app.
-  It needs a rewrite to the family skeleton, naming the round-trip golden-set.
+**Then, same session — owner: "the repo should be for students, not technical".**
+The students are young and mostly new to this, so:
+- **`src/Guide.tsx`** — the guide *in the app*, where they already are: three
+  steps, and the five questions that actually come up (the empty export first,
+  since that is the top support case). A guide on GitHub would not be read.
+- **`ANLEITUNG.md`** — the same in plain German as a portable document, so
+  razbiram.com can host it later. Includes the honest privacy paragraph.
+- **README rewritten** to the family skeleton, student-first: the guide link is
+  above the developer section. The old one described the pre-pivot Python CLI and
+  linked three screenshots that never existed.
+- Copy de-jargonised throughout (`deck.json` no longer greets a newcomer), and
+  **anchors were not styled at all** — links were invisible to exactly the people
+  who need them. Fixed in `styles.css`.
+- `docs/img/` now holds real screenshots: the app, and cards rendered through
+  **Anki's own rendering path** (light + dark), with a note on how to regenerate.
+
+**Open / blocked:**
 - **Ingest route still unconfirmed** — the primary action remains a download.
 - Hub Mini-ADR still to write; schemaId migration pending.
+- Author link: the ECOSYSTEM mandates `leon-koellerwirth.com`, the old README used
+  `leonkoellerwirth.de`. Took the ECOSYSTEM value — worth a check that it is live.
 
-**Next:** the README rewrite. Then, optionally, a live card preview in the app
-(the style is currently invisible until the student imports the file) — that is
-the one thing the design specified and the UI does not yet do.
+**Next:** a live card preview in the app — the style is still invisible until the
+student imports the file, and it is the one thing the design specified that the UI
+does not yet do. Then the hub Mini-ADR.
 
 **Continuity warnings:** theme © razbiram.com now travels *inside* every
 downloaded deck — the notice lives in the CSS string itself, keep it there;

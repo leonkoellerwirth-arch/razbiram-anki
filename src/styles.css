@@ -194,6 +194,64 @@ body {
 }
 .rz-link:hover { color: var(--primary-2); }
 .rz-link:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Links must look clickable. The people using this are new to all of it, and an
+   unstyled link is invisible to them. */
+a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--primary-2); }
+
+/* Guide — numbered steps and the "when it goes wrong" answers. Deliberately
+   plain: the students reading it are young and new to all of this. */
+.rz-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.rz-step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.rz-step-num {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 800;
+}
+.rz-faq {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  padding: 12px 16px;
+}
+.rz-faq > summary {
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+.rz-faq > summary::-webkit-details-marker { display: none; }
+.rz-faq > summary::before {
+  content: "＋";
+  color: var(--primary);
+  font-weight: 800;
+  margin-right: 8px;
+}
+.rz-faq[open] > summary::before { content: "−"; }
 .rz-btn-primary {
   background: var(--primary);
   color: var(--on-primary);

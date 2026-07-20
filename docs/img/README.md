@@ -1,11 +1,15 @@
 # Screenshots
 
-The README links these three images. Generate them once by importing
-`examples/sample-deck.apkg` into a real Anki Desktop install and screenshotting:
+All own work — no third-party images. Regenerate them when the UI or the card
+theme changes, so the README never shows a version that no longer exists.
 
-- **`card-light.png`** — a Recognize card, light mode (answer side shows badge, gloss, morphology).
-- **`card-dark.png`** — the same card in night mode (Anki: *View → Night Mode*).
-- **`deck-browser.png`** — the deck in the browser, so the CEFR tags and note count are visible.
+- **`app.png`** — the app with a deck loaded and the style toggle on. Taken from
+  the running dev server (`./start.sh`) in a headless browser at 900 px wide.
+- **`cards-light.png`** / **`cards-dark.png`** — real razbiram cards. Rendered by
+  **Anki's own rendering path**, not mocked up: the example deck is imported with
+  the `anki` Python library, `card.question()` / `card.answer()` give the exact
+  HTML Anki shows, and that is screenshotted. Dark mode is the same HTML inside
+  an element carrying Anki's `nightMode` class.
 
-Use your own screenshots only — no third-party images. Once dropped in here with
-these exact names, they render automatically in the README.
+Rendering them through Anki rather than through our own preview is the point: a
+screenshot that only proves our code agrees with itself is worth nothing.

@@ -153,5 +153,9 @@ clear "no cards" error, never a silent empty file.
       layout, path convention, and GitHub token scopes. (Blocks a real 1-click
       "In razbiram.com übernehmen" — today the concrete action is a download.)
 - [ ] **schemaId migration** `studywithme-bg.*` → `razbiram.*`, coordinated with the platform.
-- [ ] **README** — write the student-facing README (skeleton) and name the deck
-      round-trip golden-set in the methodology section.
+- [x] **Student-facing docs** — the audience is 13–18 and mostly new to this, so
+      the guide lives **in the app** (`src/Guide.tsx`: three steps + the questions
+      that actually come up), with `ANLEITUNG.md` as the portable copy razbiram.com
+      can host. README rewritten to the family skeleton, student-first, naming the
+      round-trip golden-set. The old README described the pre-pivot Python CLI and
+      linked images that did not exist. (owner, 2026-07-20)

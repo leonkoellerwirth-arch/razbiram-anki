@@ -1,129 +1,136 @@
 # razbiram-anki
 
-**Turn enriched Bulgarian texts into beautiful, well-structured Anki decks — morphology, contextual glosses, and CEFR levels included.**
+Bring deine Anki-Karten in den razbiram-Stil — im Browser, ohne Anmeldung, kostenlos.
 
-`razbiram-anki` is a small bridge between [razbiram-nlp](https://github.com/leonkoellerwirth-arch/razbiram-nlp) and [Anki](https://apps.ankiweb.net/). It reads the enriched-document JSON that razbiram-nlp produces and writes a standard `.apkg` deck: one clean, dark-mode-aware card per vocabulary word, with lemma, part of speech, compact morphology, a contextual gloss, an example sentence pulled straight from your text with the target word highlighted, and a colour-coded CEFR badge.
+*Turns a student's own Anki deck into razbiram-styled cards, and into the
+`deck.json` razbiram.com reads — entirely in the browser.*
 
-<p align="center">
-  <img src="docs/img/card-light.png" alt="Recognize card, light mode" width="45%">
-  <img src="docs/img/card-dark.png" alt="Recognize card, dark mode" width="45%">
-</p>
+![Die App: Deck hereinziehen, ansehen, im razbiram-Stil herunterladen](docs/img/app.png)
 
-## Why it's more than a script
+---
 
-- **Re-imports update, they don't duplicate.** Each note's identity is a deterministic hash of `lemma + source`, so re-exporting the same text after you've edited it *updates* the existing cards in Anki instead of piling up duplicates. This is the detail that separates a tool you use every week from one you abandon after the first import.
-- **Example sentences straight from the source.** The target word is highlighted using the exact character offsets razbiram-nlp records — no re-tokenising, no fuzzy matching, no misaligned highlights.
-- **Two card directions per word.** *Recognize* (Bulgarian word → meaning) and *Produce* (meaning + cloze sentence → word). Producing cards are one flag away from off, for beginners.
-- **Finished-looking cards.** Cyrillic-friendly system fonts, a CEFR badge scale from A1 green to C2 red, and full Anki night-mode support — built into the note type, so a shared `.apkg` looks identical on Desktop, AnkiDroid and AnkiMobile.
+## 👋 Du lernst mit Anki?
 
-## Two ways out: a file, or straight into Anki
+Dann brauchst du von dieser Seite fast nichts — nur das hier:
 
-```bash
-pip install -e ".[dev]"
-```
+**→ [Die Anleitung in einfachen Schritten](ANLEITUNG.md)**
 
-**A file to import** — works everywhere, nothing else running:
+Sie erklärt, wie du dein Deck aus Anki herausbekommst, was du hier damit machst
+und was zu tun ist, wenn etwas klemmt. Die gleiche Anleitung steht auch direkt in
+der App — du musst dir also nichts merken und nichts mitnehmen.
 
-```bash
-razbiram-anki build \
-  --in examples/sample-enriched.json \
-  --out meine-familie.apkg \
-  --title "Meine Familie" --gloss de
+Kurz gesagt:
 
-# Open Anki → File → Import → meine-familie.apkg
-```
+1. In Anki das Deck exportieren (rechte Maustaste → **Exportieren** → *Anki-Deck-Paket (.apkg)*).
+2. Die Datei hier hereinziehen.
+3. Herunterladen — als **.apkg** für dein Anki oder als **deck.json** für razbiram.com.
 
-**Straight into your open Anki — no import step** (built for students and schools):
+**Deine Karten verlassen deinen Computer nicht.** Kein Konto, keine
+Nachverfolgung, keine Kosten.
 
-```bash
-razbiram-anki sync \
-  --in examples/sample-enriched.json \
-  --title "Meine Familie" --gloss de
-# ✓ Verbunden mit Anki (127.0.0.1:8765)
-# ✓ 11 Vokabeln in Deck „razbiram::Texte::Meine Familie" (11 neu, 0 aktualisiert)
-# → Direkt lernbereit — kein Import nötig.
-```
+So sehen die Karten danach aus, hell und dunkel:
 
-`sync` needs Anki open with the free **AnkiConnect** add-on (Anki → *Tools → Add-ons → Get Add-ons* → code `2055492159`, then restart Anki). Re-running `sync` after you edit the text **updates** the cards in place — it never duplicates. If Anki isn't reachable, the tool tells you exactly how to fix it and points you back to `build`.
+![razbiram-Karten im Hellmodus](docs/img/cards-light.png)
+![razbiram-Karten im Dunkelmodus](docs/img/cards-dark.png)
 
-The bundled [`examples/sample-enriched.json`](examples/sample-enriched.json) is a short own paragraph built from authentic A2 vocabulary, so you can build or sync a real deck before you've run razbiram-nlp on anything.
+---
 
-## How it fits together
+## Part of the razbiram ecosystem
 
 ```mermaid
 flowchart LR
-    A[Bulgarian text] --> B[razbiram-nlp]
-    B --> C[EnrichedDocument JSON]
-    C --> D[razbiram-anki]
-    D -->|build| E[.apkg file]
-    D -->|sync| G[AnkiConnect]
-    E --> F[Anki · AnkiDroid · AnkiMobile]
-    G --> F
+  APKG[".apkg — a student's own deck"] --> ANKI
+  NLP["razbiram-nlp<br/>engine &amp; schema hub"] -->|EnrichedDocument| ANKI["razbiram-anki<br/>the Anki bridge"]
+  NLP --> LISTEN["razbiram-listen<br/>audio &amp; timings"]
+  ANKI -->|deck.json| COM["razbiram.com<br/>the platform"]
+  ANKI -->|styled .apkg| APKG
+  LISTEN --> COM
 ```
 
-razbiram-anki consumes **only** the public JSON format — no backend code, no API keys, no product logic. See [`docs/card-design.md`](docs/card-design.md) for the card design decisions.
+- **[razbiram-nlp](https://github.com/leonkoellerwirth-arch/razbiram-nlp)** — the
+  engine and the home of the `EnrichedDocument` schema.
+- **razbiram-anki** (this repo) — the bridge across the Anki boundary, both ways.
+- **razbiram-listen** — audio in, timings out.
+- **razbiram.com** — the platform students actually learn on.
 
-## Configuration
+The forward direction (`EnrichedDocument` → styled `.apkg`) is frozen in
+`legacy/`. The reverse direction — a student's own `.apkg` → CrowdAnki
+`deck.json`, plus a razbiram-styled `.apkg` for their own Anki — is this app and
+the current focus.
 
-Pass options as CLI flags, or put them in a YAML file and override per-run with flags (`--config deck.yml --max-cards 30`). CLI flags win over the YAML.
+---
 
-| Option | CLI flag | Default | What it does |
-| --- | --- | --- | --- |
-| `deck_name` | `--deck-name` | `razbiram::Texte::{title}` | Anki deck name; `{title}` is substituted. Use `::` for subdecks. |
-| `title` | `--title` | input file stem | Human title; fills `{title}` and tags every note. |
-| `levels` | `--levels` | all | CEFR bands to include, e.g. `A2,B1`. |
-| `min_freq_rank` | `--min-freq-rank` | none | Drop words rarer than this global frequency rank. |
-| `max_cards` | `--max-cards` | unlimited | Cap notes per deck — the **hardest** words are kept. |
-| `include_unbanded` | — | `true` | Keep words whose CEFR band is unknown. |
-| `gloss_lang` | `--gloss` | any | Only use glosses in this language, e.g. `de`. |
-| `produce_cards` | `--no-produce` to disable | `true` | Also generate produce (recall) cards. |
-| `tags` | — | none | Extra tags added to every note. |
-| `tag_prefix` | — | `razbiram` | Namespace for auto tags, e.g. `razbiram::A2`. |
+## Quickstart (for developers)
 
-Example `deck.yml`:
-
-```yaml
-title: Meine Familie
-deck_name: "razbiram::Texte::{title}"
-levels: [A1, A2]
-gloss_lang: de
-max_cards: 40
+```bash
+./start.sh          # install dependencies if needed, then start the dev server
+npm run build       # tsc --noEmit && vite build
+npm test            # unit tests, including the round-trip golden-set
 ```
 
-## Für Lehrkräfte
+`./scripts/gate.sh` runs the full quality gate; `./scripts/state.sh` prints the
+factual state of the repo.
 
-Aus einem Klassentext wird in wenigen Minuten ein fertiges Anki-Deck: Text durch razbiram-nlp laufen lassen, das JSON mit `razbiram-anki build` in ein Deck verwandeln, an die Klasse verteilen. CEFR-Filter, Glossen-Sprache und eine Obergrenze für die schwersten Wörter sind über einfache Flags steuerbar. Die ausführliche Anleitung steht in **[docs/for-teachers.de.md](docs/for-teachers.de.md)**.
+---
 
-## Library use
+## What it does
 
-```python
-from razbiram_anki import EnrichedDocument, DeckConfig, build_deck, sync_deck
+| | |
+|---|---|
+| **Reads** | `.apkg` (schema 11 through 18, including zstd-compressed `.anki21b`) and existing CrowdAnki `deck.json` files |
+| **Writes** | CrowdAnki `deck.json` (plus a `media/` folder) and a real `.apkg` |
+| **Styles** | the razbiram card theme — warm palette, coral accent, the Studio CEFR scale, full dark mode — applied to note models on request |
+| **Preserves** | the student's original note models. The style toggle is reversible, and note GUIDs are kept, so a re-import updates instead of duplicating |
+| **Sends** | nothing. No network calls, no telemetry, no accounts — the conversion runs in the browser |
 
-doc = EnrichedDocument.from_json_file("enriched.json")
+The style replaces the CSS of every note model, but rewrites **templates** only
+for models with exactly two fields. Anything richer keeps its own layout, because
+a rewrite would silently drop fields off the card.
 
-# to a file …
-result = build_deck(doc, DeckConfig(title="Meine Familie", gloss_lang="de"), "deck.apkg")
-print(f"{result.note_count} notes, {result.card_count} cards → {result.path}")
+---
 
-# … or straight into a running Anki (AnkiConnect add-on)
-synced = sync_deck(doc, DeckConfig(title="Meine Familie", gloss_lang="de"))
-print(f"{synced.added} new, {synced.updated} updated")
-```
+## Methodology — evaluated, not assumed
 
-## Roadmap (planned, not built)
+The house heuristic here is the **deck round-trip**, kept as a regression test
+rather than a claim:
 
-- Audio / TTS on cards
-- Optional images for concrete nouns
-- Pulling texts directly from the razbiram platform
+- `.apkg → deck.json → .apkg → re-parse`, asserted field for field: note count,
+  field values, tags, deck hierarchy, note models, media bytes and GUIDs
+  (`src/apkg/write.test.ts`).
+- `.apkg → deck.json` resolved exactly the way razbiram.com's own
+  `ankiNoteParser` walks it (`src/crowdanki/deckJson.test.ts`).
+- The `.apkg` writer is verified **against Anki's own importer**, not only against
+  our parser — and its SQLite schema was dumped from a real collection rather than
+  written from memory.
+- The example deck's Bulgarian is checked entry by entry; anything uncertain is
+  dropped rather than guessed (BIBLE §8).
 
-(Live sync via AnkiConnect is done — see `razbiram-anki sync` above.)
+`scripts/smoke-decks.sh` runs the real pipeline over a folder of real Anki
+exports, because one fixture is not a sample.
 
-## Disclaimer
+---
 
-Unofficial community tool. Not affiliated with or endorsed by the Anki project; *Anki* is a trademark of its respective owners. razbiram-anki produces standard `.apkg` files and consumes only the documented public JSON format of razbiram-nlp.
+## Roadmap (planned, not promised)
 
-## Author
+- A live card preview in the app, so the style is visible before downloading.
+- The guide hosted on razbiram.com.
+- razbiram-styled templates for cloze, multiple-choice and image-occlusion models.
+- Migration of the schema namespace `studywithme-bg.*` → `razbiram.*`.
 
-Leon Köllerwirth Hlihel — [leonkoellerwirth.de](https://leonkoellerwirth.de) · companion project: [razbiram-nlp](https://github.com/leonkoellerwirth-arch/razbiram-nlp)
+---
 
-MIT licensed.
+## Disclaimer & licence
+
+*Anki* is a trademark of its respective owners. razbiram is not affiliated with,
+endorsed by, or connected to the Anki project.
+
+The code is **MIT** licensed — see [LICENSE](LICENSE). The **visual identity**
+(the warm palette, the coral accent, the CEFR scale, the type choices and the
+`razb·i·ram` wordmark) is **© razbiram.com** and is *not* covered by the MIT
+licence. It travels inside every styled deck: attribute it, do not relicense it.
+
+---
+
+Built by [Leon Köllerwirth Hlihel](https://leon-koellerwirth.com) — AI governance &
+agentic engineering in regulated environments ·
+[LinkedIn](https://www.linkedin.com/in/leon-koellerwirth/)
