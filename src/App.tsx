@@ -375,7 +375,9 @@ function Result({ result, dark }: { result: ConvertResult; dark: boolean }) {
         </div>
       ) : (
         <div className="rz-faint" style={{ marginTop: 8, fontSize: 13 }}>
-          Lade die Datei anschließend in razbiram.com hoch.
+          Mit <b>.apkg</b> landen die Karten per Doppelklick in deinem Anki.{" "}
+          <b>deck.json</b> ist das Format, in dem razbiram.com Decks liest — ein
+          eigener Upload dort ist noch in Arbeit.
         </div>
       )}
 

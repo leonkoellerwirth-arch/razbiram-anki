@@ -79,7 +79,7 @@ factual state of the repo.
 |---|---|
 | **Reads** | `.apkg` (schema 11 through 18, including zstd-compressed `.anki21b`) and existing CrowdAnki `deck.json` files |
 | **Writes** | CrowdAnki `deck.json` (plus a `media/` folder) and a real `.apkg` |
-| **Styles** | the razbiram card theme — warm palette, coral accent, the Studio CEFR scale, full dark mode — applied to note models on request |
+| **Styles** | the razbiram card theme — warm palette, coral accent, the Studio CEFR scale, full dark mode — applied to note models on request. The styling shows up **in Anki**: razbiram.com renders cards with its own design system and does not read a note model's `css`/`qfmt`/`afmt` |
 | **Preserves** | the student's original note models. The style toggle is reversible, and note GUIDs are kept, so a re-import updates instead of duplicating |
 | **Sends** | nothing. No network calls, no telemetry, no accounts — the conversion runs in the browser |
 

@@ -35,9 +35,9 @@ const STEPS: { title: string; body: React.ReactNode }[] = [
       <>
         Du siehst sofort, wie viele Karten gefunden wurden. Setz das Häkchen bei{" "}
         <b>razbiram-Stil anwenden</b>, wenn deine Karten im razbiram-Design
-        aussehen sollen. Dann lädst du sie herunter — als{" "}
-        <b>.apkg für Anki</b> (zum Doppelklicken, landet direkt in deinem Anki)
-        oder als <b>deck.json</b> (die Datei für razbiram.com).
+        aussehen sollen. Dann lädst du sie herunter: <b>.apkg für Anki</b> — zum
+        Doppelklicken, landet direkt in deinem Anki. Das ist der Weg, auf dem du
+        den razbiram-Stil auch wirklich siehst.
       </>
     ),
   },
@@ -81,6 +81,17 @@ const HELP: { q: string; a: React.ReactNode }[] = [
         Zum Umwandeln brauchst du einen Computer, weil du die Datei aus Anki
         exportieren musst. Die fertigen Karten kannst du danach ganz normal auf dem
         Handy lernen.
+      </>
+    ),
+  },
+  {
+    q: "Und was ist die deck.json?",
+    a: (
+      <>
+        Das ist das Format, in dem razbiram.com seine Decks liest. Ein eigener
+        Upload dort ist noch in Arbeit — bis dahin ist die Datei vor allem für
+        Lehrkräfte und für razbiram selbst nützlich. Für dein eigenes Lernen
+        nimmst du die <b>.apkg</b>.
       </>
     ),
   },

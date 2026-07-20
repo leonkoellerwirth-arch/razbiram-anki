@@ -92,10 +92,28 @@ clear "no cards" error, never a silent empty file.
       format razbiram.com reads from its own content store. That is the whole job;
       nothing more. (owner, 2026-07-10)
 - [x] **No GitHub in the student path** — the platform reads its own content store
-      server-side; there is no per-student repo and no in-app push. The primary
-      path is a local file the student uploads in the platform, not a GitHub push.
-      (corrects the earlier per-student-repo+token choice.) Platform-internal
+      server-side; there is no per-student repo and no in-app push. Platform-internal
       repo names and paths stay out of this public file — ECOSYSTEM §7.
+- [x] **Ingest route — finally verified against the platform's own code
+      (2026-07-20), and the answer corrects two long-standing assumptions here:**
+      1. **There is no self-serve upload for a converted deck.** The platform's
+         deck endpoints are read-only; its one deck-upload surface takes the
+         platform's *own* card format, not CrowdAnki. A student cannot bring their
+         converted `deck.json` in by themselves today. The UI must not promise it —
+         it previously did ("Lade die Datei anschließend in razbiram.com hoch"),
+         which was untrue. Fixed.
+      2. **A curated deck needs more than `deck.json`** — sibling manifest files are
+         generated alongside it. razbiram-anki produces none of them.
+      This closes the item that had been open since 2026-07-10. What it does *not*
+      do is give students a route; that is a platform-side decision.
+- [x] **The platform ignores card styling.** Its CrowdAnki reader consumes only
+      `note_models[].{crowdanki_uuid,name,flds}`, `notes[].{guid,note_model_uuid,
+      tags,fields}` and `children`. It never reads `css`, `tmpls`, `qfmt`, `afmt`
+      or `media_files` — cards are rendered with the platform's own design system.
+      **Consequence: the razbiram style is visible in the student's Anki, not on
+      razbiram.com.** We still write it into the `deck.json` (harmless, and correct
+      if the platform ever honours it), but no document here may claim otherwise.
+      (verified 2026-07-20)
 - [x] **Reuse by format-compatibility** — produce the exact CrowdAnki `deck.json`
       shape the app's `ankiNoteParser.prepareCrowdAnkiNotes` already reads (and that
       `generate_manifests.py` classifies). No adapter port: the app owns everything

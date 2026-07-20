@@ -67,8 +67,10 @@ Dann lädst du herunter. Es gibt zwei Knöpfe, und du brauchst nur einen davon:
 
 | Knopf | Wofür | Was du damit machst |
 |---|---|---|
-| **.apkg für Anki** | für dein eigenes Anki | Doppelklick auf die Datei — Anki öffnet sich und fügt die Karten ein. |
-| **deck.json** | für razbiram.com | Diese Datei lädst du auf razbiram.com hoch. |
+| **.apkg für Anki** | für dein eigenes Anki | Doppelklick auf die Datei — Anki öffnet sich und fügt die Karten ein. **Nur hier siehst du den razbiram-Stil.** |
+| **deck.json** | das Deck-Format von razbiram.com | Für Lehrkräfte und für razbiram. Ein eigener Upload auf razbiram.com ist noch in Arbeit. |
+
+Für dein eigenes Lernen ist die **.apkg** die richtige Wahl.
 
 Karten, die du schon hast, werden beim Einfügen **aktualisiert** und nicht doppelt
 angelegt.
